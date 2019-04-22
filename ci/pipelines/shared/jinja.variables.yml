@@ -57,7 +57,8 @@ java_test_versions:
   version: 11
 
 benchmarks:
-  baseline_branch: "develop"
+  branch: "release/1.9.0"
+  baseline_branch: ""
   baseline_version: "1.8.0"
 
 java_build_version:
