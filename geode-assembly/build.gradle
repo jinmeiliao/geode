@@ -355,6 +355,7 @@ task configureGfshDepsJar(dependsOn: configurations.gfshDependencies.dependencie
   }
   doLast {
     def classpath = configureDepsJar.outputs.files.singleFile.text + ' ' +
+        project(':geode-core').webJar.archiveName + ' ' +
         configurations.gfshDependencies.collect { it.getName() }.findAll {
           !it.contains('geode-all-bom')
         }.flatten().unique().join(' ')
