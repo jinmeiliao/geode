@@ -969,7 +969,7 @@ public class ClusterDistributionManager implements DistributionManager {
       throw err;
     } catch (Throwable t) {
       SystemFailure.checkFailure();
-      if (isCloseInProgress()) {
+      if (shouldInhibitMembershipWarnings()) {
         logger.debug("Caught unusual exception during shutdown: {}", t.getMessage(), t);
       } else {
         logger.warn("Task failed with exception", t);
@@ -1984,18 +1984,18 @@ public class ClusterDistributionManager implements DistributionManager {
     }
   }
 
-  /**
-   * Returns true if this DM or the DistributedSystem owned by it is closing or is closed.
-   */
-  protected boolean isCloseInProgress() {
-    if (closeInProgress) {
+  private boolean shouldInhibitMembershipWarnings() {
+    if (isCloseInProgress()) {
       return true;
     }
     InternalDistributedSystem ds = getSystem();
     return ds != null && ds.isDisconnecting();
   }
 
-  public boolean isShutdownStarted() {
+  /**
+   * Returns true if this distribution manager has initiated shutdown
+   */
+  public boolean isCloseInProgress() {
     return closeInProgress;
   }
 
@@ -2060,7 +2060,7 @@ public class ClusterDistributionManager implements DistributionManager {
               ClusterDistributionManager.this.membershipEventQueue.take();
           handleMemberEvent(ev);
         } catch (InterruptedException e) {
-          if (isCloseInProgress()) {
+          if (shouldInhibitMembershipWarnings()) {
             if (logger.isTraceEnabled()) {
               logger.trace("MemberEventInvoker: InterruptedException during shutdown");
             }
@@ -2071,7 +2071,7 @@ public class ClusterDistributionManager implements DistributionManager {
         } catch (DistributedSystemDisconnectedException e) {
           break;
         } catch (CancelException e) {
-          if (isCloseInProgress()) {
+          if (shouldInhibitMembershipWarnings()) {
             if (logger.isTraceEnabled()) {
               logger.trace("MemberEventInvoker: cancelled");
             }
@@ -2672,7 +2672,7 @@ public class ClusterDistributionManager implements DistributionManager {
         this.stats.incNodes(-1);
       }
       String msg;
-      if (p_crashed && !isCloseInProgress()) {
+      if (p_crashed && !shouldInhibitMembershipWarnings()) {
         msg =
             "Member at {} unexpectedly left the distributed cache: {}";
         addMemberEvent(new MemberCrashedEvent(theId, p_reason));
@@ -2912,7 +2912,7 @@ public class ClusterDistributionManager implements DistributionManager {
   }
 
   @Override
-  public ElderState getElderState(boolean waitToBecomeElder) {
+  public ElderState getElderState(boolean waitToBecomeElder) throws InterruptedException {
     return clusterElderManager.getElderState(waitToBecomeElder);
   }
 
@@ -2921,7 +2921,8 @@ public class ClusterDistributionManager implements DistributionManager {
    *
    * @return true if newElder is the elder; false if it is no longer a member or we are the elder.
    */
-  public boolean waitForElder(final InternalDistributedMember desiredElder) {
+  public boolean waitForElder(final InternalDistributedMember desiredElder)
+      throws InterruptedException {
 
     return clusterElderManager.waitForElder(desiredElder);
   }
@@ -3510,7 +3511,7 @@ public class ClusterDistributionManager implements DistributionManager {
         try {
           handleEvent(manager, listener);
         } catch (CancelException e) {
-          if (manager.isCloseInProgress()) {
+          if (manager.shouldInhibitMembershipWarnings()) {
             if (logger.isTraceEnabled()) {
               logger.trace("MemberEventInvoker: cancelled");
             }
