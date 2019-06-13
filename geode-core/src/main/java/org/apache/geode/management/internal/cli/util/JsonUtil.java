@@ -352,8 +352,8 @@ public class JsonUtil {
         || klass.isAssignableFrom(Float.class) || klass.isAssignableFrom(float.class)
         || klass.isAssignableFrom(Double.class) || klass.isAssignableFrom(double.class)
         || klass.isAssignableFrom(Boolean.class) || klass.isAssignableFrom(boolean.class)
-        || klass.isAssignableFrom(String.class) || klass.isAssignableFrom(Character.class)
-        || klass.isAssignableFrom(char.class);
+        || klass.isAssignableFrom(Character.class) || klass.isAssignableFrom(char.class)
+        || klass.isAssignableFrom(String.class);
   }
 
   public static Object getPrimitiveOrWrapperValue(Class<?> klass, Object value)
