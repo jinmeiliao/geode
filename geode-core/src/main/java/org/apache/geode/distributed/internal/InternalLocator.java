@@ -1100,37 +1100,38 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
         throw new IllegalStateException(
             "A locator can not be created because one already exists in this JVM.");
       }
-      this.myDs = newSystem;
-      this.myCache = newCache;
-      this.myDs.setDependentLocator(this);
-      logger.info("Locator restart: initializing TcpServer");
-
-      try {
-        this.server.restarting(newSystem, newCache, this.configurationPersistenceService);
-      } catch (CancelException e) {
-        this.myDs = null;
-        this.myCache = null;
-        logger.info("Locator restart: attempt to restart location services failed", e);
-        throw e;
-      }
-      if (this.productUseLog.isClosed()) {
-        this.productUseLog.reopen();
-      }
-      this.productUseLog.monitorUse(newSystem);
-      if (isSharedConfigurationEnabled()) {
-        this.configurationPersistenceService =
-            new InternalConfigurationPersistenceService(newCache);
-        startClusterManagementService();
-      }
-      if (!this.server.isAlive()) {
-        logger.info("Locator restart: starting TcpServer");
-        startTcpServer();
-      }
-      logger.info("Locator restart: initializing JMX manager");
-      startJmxManagerLocationService(newCache);
-      endStartLocator(this.myDs);
-      logger.info("Locator restart completed");
     }
+    this.myDs = newSystem;
+    this.myCache = newCache;
+    this.myDs.setDependentLocator(this);
+    logger.info("Locator restart: initializing TcpServer");
+
+    try {
+      this.server.restarting(newSystem, newCache, this.configurationPersistenceService);
+    } catch (CancelException e) {
+      this.myDs = null;
+      this.myCache = null;
+      logger.info("Locator restart: attempt to restart location services failed", e);
+      throw e;
+    }
+    if (this.productUseLog.isClosed()) {
+      this.productUseLog.reopen();
+    }
+    this.productUseLog.monitorUse(newSystem);
+    if (isSharedConfigurationEnabled()) {
+      this.configurationPersistenceService =
+          new InternalConfigurationPersistenceService(newCache);
+      startClusterManagementService();
+    }
+    if (!this.server.isAlive()) {
+      logger.info("Locator restart: starting TcpServer");
+      startTcpServer();
+    }
+    logger.info("Locator restart: initializing JMX manager");
+    startJmxManagerLocationService(newCache);
+    endStartLocator(this.myDs);
+    logger.info("Locator restart completed");
+
     this.server.restartCompleted(newSystem);
   }
 

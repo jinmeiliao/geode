@@ -111,9 +111,6 @@ public class ClusterDistributionManager implements DistributionManager {
 
   private static final Logger logger = LogService.getLogger();
 
-  private static final int STARTUP_TIMEOUT =
-      Integer.getInteger("DistributionManager.STARTUP_TIMEOUT", 15000).intValue();
-
   private static final boolean DEBUG_NO_ACKNOWLEDGEMENTS =
       Boolean.getBoolean("DistributionManager.DEBUG_NO_ACKNOWLEDGEMENTS");
 
@@ -2258,7 +2255,7 @@ public class ClusterDistributionManager implements DistributionManager {
     }
 
     try {
-      ok = startupOperation.sendStartupMessage(allOthers, STARTUP_TIMEOUT, equivs, redundancyZone,
+      ok = startupOperation.sendStartupMessage(allOthers, equivs, redundancyZone,
           enforceUniqueZone());
     } catch (Exception re) {
       throw new SystemConnectException(
