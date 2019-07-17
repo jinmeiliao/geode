@@ -181,11 +181,10 @@ public class StartupResponseMessage extends HighPriorityDistributionMessage
         if (!this.responderIsAdmin) {
           proc.setReceivedAcceptance(true);
         }
-      }
-
-      proc.process(this);
-      if (logger.isTraceEnabled(LogMarker.DM_VERBOSE)) {
-        logger.trace(LogMarker.DM_VERBOSE, "{} Processed {}", proc, this);
+        proc.process(this);
+        if (logger.isTraceEnabled(LogMarker.DM_VERBOSE)) {
+          logger.trace(LogMarker.DM_VERBOSE, "{} Processed {}", proc, this);
+        }
       }
     } // proc != null
   }
