@@ -780,7 +780,7 @@ public abstract class AbstractGatewaySenderEventProcessor extends LoggingThread
         if (gsEvent.shouldBeConflated()) {
           // The event should be conflated. Create the conflation key
           // (comprised of the event's region, key and the operation).
-          ConflationKey key = new ConflationKey(gsEvent.getRegion().getFullPath(),
+          ConflationKey key = new ConflationKey(gsEvent.getRegionPath(),
               gsEvent.getKeyToConflate(), gsEvent.getOperation());
 
           // Attempt to remove the key. If the entry is removed, that means a
@@ -792,7 +792,7 @@ public abstract class AbstractGatewaySenderEventProcessor extends LoggingThread
         } else {
           // The event should not be conflated (create or destroy). Add it to
           // the map.
-          ConflationKey key = new ConflationKey(gsEvent.getRegion().getFullPath(),
+          ConflationKey key = new ConflationKey(gsEvent.getRegionPath(),
               gsEvent.getKeyToConflate(), gsEvent.getOperation(), gsEvent.getShadowKey());
           conflatedEventsMap.put(key, gsEvent);
         }
