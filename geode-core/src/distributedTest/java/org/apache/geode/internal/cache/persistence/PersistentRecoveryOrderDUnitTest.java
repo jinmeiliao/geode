@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -80,7 +79,6 @@ import org.apache.geode.internal.cache.InitialImageOperation.RequestImageMessage
 import org.apache.geode.internal.cache.InternalRegionArguments;
 import org.apache.geode.internal.cache.LocalRegion;
 import org.apache.geode.internal.cache.TXManagerImpl;
-import org.apache.geode.internal.cache.versions.RegionVersionHolder;
 import org.apache.geode.internal.cache.versions.RegionVersionVector;
 import org.apache.geode.test.awaitility.GeodeAwaitility;
 import org.apache.geode.test.dunit.Assert;
@@ -757,16 +755,6 @@ public class PersistentRecoveryOrderDUnitTest extends PersistentReplicatedTestBa
         assertEquals(1, dr.getOnlineMembers().size());
       }
     });
-  }
-
-  HashMap<DiskStoreID, RegionVersionHolder<DiskStoreID>> getAllMemberToVersion(
-      RegionVersionVector rvv) {
-    HashMap<DiskStoreID, RegionVersionHolder<DiskStoreID>> allMemberToVersion =
-        new HashMap(rvv.getMemberToVersion());
-    RegionVersionHolder localHolder = rvv.getLocalExceptions().clone();
-    localHolder.setVersion(rvv.getCurrentVersion());
-    allMemberToVersion.put((DiskStoreID) rvv.getOwnerId(), localHolder);
-    return allMemberToVersion;
   }
 
   protected Object getEntry(VM vm, final String key) {
