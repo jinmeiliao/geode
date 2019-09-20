@@ -1221,14 +1221,14 @@ public class PartitionedRegion extends LocalRegion
     }
   }
 
-  public void updatePRConfigWithNewSetOfGatewaySenders(Set<String> gatewaySendersToAdd) {
-    PartitionRegionHelper.assignBucketsToPartitions(this);
+  public void updatePRConfigWithNewSetOfAsynchronousEventDispatchers(
+      Set<String> asynchronousEventDispatchers) {
     updatePartitionRegionConfig(prConfig -> {
-      prConfig.setGatewaySenderIds(gatewaySendersToAdd);
+      prConfig.setGatewaySenderIds(asynchronousEventDispatchers);
     });
   }
 
-  public void updatePRConfigWithNewGatewaySender(String aeqId) {
+  public void updatePRConfigWithNewGatewaySenderAfterAssigningBuckets(String aeqId) {
     PartitionRegionHelper.assignBucketsToPartitions(this);
     updatePartitionRegionConfig(prConfig -> {
       Set<String> newGateWayIds;

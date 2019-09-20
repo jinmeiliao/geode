@@ -122,7 +122,9 @@ public class RegionAlterFunction extends CliFunction<RegionConfig> {
       } else if (region.getAsyncEventQueueIds() != null) {
         senderIds.addAll(region.getAsyncEventQueueIds());
       }
-      ((PartitionedRegion) region).updatePRConfigWithNewSetOfGatewaySenders(senderIds);
+      // ((PartitionedRegion) region).updatePRConfigWithNewSetOfGatewaySenders(senderIds);
+      ((PartitionedRegion) region)
+          .updatePRConfigWithNewSetOfAsynchronousEventDispatchers(senderIds);
     }
 
     // Alter Gateway Sender Ids
