@@ -35,15 +35,4 @@
     <developerConnection>scm:git:https://github.com:apache/geode.git</developerConnection>
     <url>https://github.com/apache/geode</url>
   </scm>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>io.pivotal.gemfire</groupId>
-        <artifactId>geode-all-bom</artifactId>
-        <version>9.8.0</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>
