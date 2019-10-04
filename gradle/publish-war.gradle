@@ -15,20 +15,14 @@
  * limitations under the License.
  */
 
-apply from: "${rootDir}/${scriptDir}/standard-subproject-configuration.gradle"
+apply from: "${rootDir}/gradle/publish-common.gradle"
 
-apply from: "${project.projectDir}/../gradle/publish-java.gradle"
-
-dependencies {
-  compile(platform(project(':boms:geode-all-bom')))
-  compile(project(':geode-core'))
-  compile('com.github.davidmoten:geo')
-  compile('io.netty:netty-all')
-  compile('org.apache.logging.log4j:log4j-api')
-  distributedTestCompile(project(':geode-dunit'))
-  integrationTestCompile('redis.clients:jedis')
-  distributedTestCompile('redis.clients:jedis')
-  testCompile('org.mockito:mockito-core')
-  testCompile(project(':geode-junit'))
-  integrationTestCompile(project(':geode-junit'))
+publishing {
+  publications {
+    maven(MavenPublication) {
+      if (project.name != 'geode-assembly') {
+        from components.web
+      }
+    }
+  }
 }
