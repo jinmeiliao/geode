@@ -49,7 +49,7 @@ GCP_NETWORK=${GCP_NETWORK##*/}
 GCP_SUBNETWORK=$(echo ${NETWORK_INTERFACE_INFO} | jq -r '.networkInterfaces[0].subnetwork')
 GCP_SUBNETWORK=${GCP_SUBNETWORK##*/}
 ENV_ID=$(echo ${GCP_NETWORK} | awk -F- '{ print $1}')
-VERSION_BUCKET="concourse-${ENV_ID}-version"
+VERSION_BUCKET="concourse-gemfire-version"
 
 #echo "DEBUG INFO *****************************"
 #echo "Pipeline prefix = ${PIPELINE_PREFIX}"
