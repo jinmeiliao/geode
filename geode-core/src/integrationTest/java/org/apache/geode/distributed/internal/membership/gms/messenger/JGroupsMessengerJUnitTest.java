@@ -212,7 +212,8 @@ public class JGroupsMessengerJUnitTest {
     messenger.installView(v);
     messenger.handleJGroupsIOException(new IOException("je m'en fiche"),
         new JGAddress(v.getMembers().get(1)));
-    verify(healthMonitor).suspect(isA(InternalDistributedMember.class), isA(String.class));
+    verify(healthMonitor).checkIfAvailable(isA(InternalDistributedMember.class), isA(String.class),
+        isA(Boolean.class));
   }
 
   @Test
@@ -822,8 +823,8 @@ public class JGroupsMessengerJUnitTest {
 
     IOException ioe = new IOException("test exception");
     messenger.handleJGroupsIOException(ioe, new JGAddress(mbr));
-    messenger.handleJGroupsIOException(ioe, new JGAddress(mbr)); // should be ignored
-    verify(healthMonitor).suspect(mbr, "Unable to send messages to this member via JGroups");
+    verify(healthMonitor).checkIfAvailable(mbr,
+        "Unable to send messages to this member via JGroups", Boolean.TRUE);
   }
 
   @Test
