@@ -341,7 +341,7 @@ public class CacheClientProxy implements ClientSession {
     StatisticsFactory factory = this._cache.getDistributedSystem();
     this._statistics =
         new CacheClientProxyStats(factory, "id_" + this.proxyID.getDistributedMember().getId()
-            + "_at_" + this._remoteHostAddress + ":" + this._socket.getPort());
+            + "_at_" + this._remoteHostAddress);
     this.subject = subject;
 
     // Create the interest list
@@ -414,7 +414,7 @@ public class CacheClientProxy implements ClientSession {
       }
       this._commBuffer = ServerConnection.allocateCommBuffer(bufSize, socket);
     }
-    this._remoteHostAddress = socket.getInetAddress().getHostAddress();
+    this._remoteHostAddress = socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
     this.isPrimary = ip;
     this.clientConflation = cc;
     this.clientVersion = vers;

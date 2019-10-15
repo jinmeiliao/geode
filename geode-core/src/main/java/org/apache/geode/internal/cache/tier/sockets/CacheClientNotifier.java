@@ -1561,6 +1561,8 @@ public class CacheClientNotifier {
       } catch (CancelException e) {
         throw e;
       } catch (Exception e) {
+        logger.warn("CacheClientNotifier: Caught exception attempting to close client: {}", proxy,
+            e);
       }
 
       // Remove the proxy if necessary. It might not be necessary to remove the proxy if it is
