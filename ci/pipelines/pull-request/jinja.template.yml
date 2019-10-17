@@ -32,10 +32,14 @@ resources:
 - name: geode
   type: pull-request
   source:
+    base_branch: ((geode-build-branch))
     access_token: ((!github-pr-access-token))
+    paths:
+    - *
     ignore_paths:
     - geode-docs/*
     - geode-book/*
+    - ci/*
     repository: {{repository.fork}}/((geode-repo-name))
     disable_ci_skip: false
     skip_ssl_verification: false
