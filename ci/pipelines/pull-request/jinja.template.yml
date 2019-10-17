@@ -35,7 +35,7 @@ resources:
     ignore_paths:
     - geode-docs/*
     - geode-book/*
-    repository: {{repository.fork}}/geode
+    repository: {{repository.fork}}/((geode-repo-name))
     disable_ci_skip: false
     skip_ssl_verification: false
 - name: geode-ci
@@ -46,7 +46,8 @@ resources:
     paths:
     - ci/pipelines/geode-build/*
     - ci/scripts/*
-    uri: https://github.com/apache/geode.git
+    {{ github_access() | indent(4) }}
+
 - name: concourse-metadata-resource
   type: concourse-metadata-resource
   source: {}
