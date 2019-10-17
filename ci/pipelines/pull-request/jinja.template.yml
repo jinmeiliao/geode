@@ -16,6 +16,7 @@
 #
 
 {% from 'shared_jinja.yml' import pipeline_prefix with context %}
+{% from 'shared_jinja.yml' import github_access with context %}
 {% from 'shared_jinja.yml' import init_retry with context %}
 
 groups:
