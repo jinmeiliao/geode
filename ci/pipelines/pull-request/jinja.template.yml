@@ -34,8 +34,6 @@ resources:
   source:
     base_branch: ((geode-build-branch))
     access_token: ((!github-pr-access-token))
-    paths:
-    - *
     ignore_paths:
     - geode-docs/*
     - geode-book/*
