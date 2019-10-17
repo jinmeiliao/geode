@@ -246,10 +246,6 @@ public abstract class DistributionMessage implements DataSerializableFixedID, Cl
    * then the message will be sent to all distribution managers.
    */
   public void setRecipients(Collection<? extends DistributedMember> recipients) {
-    if (this.recipients != null) {
-      throw new IllegalStateException(
-          "Recipients can only be set once");
-    }
     this.recipients = recipients
         .toArray(new InternalDistributedMember[recipients.size()]);
   }
