@@ -72,10 +72,10 @@ resource_types:
 - name: concourse-metadata-resource
   type: docker-image
   source:
-    password: ((!docker-password))
-    repository: gcr.io/apachegeode-ci/((pipeline-prefix))concourse-metadata-resource
+    password: ((docker-password))
+    repository: gcr.io/((gcp-project))/((pipeline-prefix))concourse-metadata-resource
     tag: latest
-    username: ((!docker-username))
+    username: ((docker-username))
 jobs:
 - name: {{build_test.name}}
   public: true
