@@ -203,6 +203,9 @@ dependencies {
   integrationTestCompile('javax.annotation:javax.annotation-api')
 
   integrationTestRuntime('io.swagger:swagger-annotations')
+  // these two modules are for testing only
+  integrationTestRuntime('com.fasterxml.jackson.datatype:jackson-datatype-joda')
+  integrationTestRuntime('joda-time:joda-time')
 
 
   distributedTestCompile(project(':geode-core'))
