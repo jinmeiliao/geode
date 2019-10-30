@@ -66,6 +66,7 @@ resources:
         - ((pipeline-prefix))main
         - {{job_name}}
         - 50
+        - '--team=support-versions'
 
 {%- endmacro %}
 
