@@ -122,7 +122,7 @@ YML
     --var semver-prerelease-token="${SEMVER_PRERELEASE_TOKEN}" \
     --var upstream-fork=${UPSTREAM_FORK} \
     --var fly-target=${FLY_TARGET} \
-    --yaml-var public-pipelines=${PUBLIC}
+    --yaml-var public-pipelines=${PUBLIC} 2>&1 |tee flyOutput.log
 
   if [[ "$(tail -n1 flyOutput.log)" == "bailing out" ]]; then
     exit 1
