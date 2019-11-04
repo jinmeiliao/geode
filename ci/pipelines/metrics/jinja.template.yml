@@ -59,11 +59,10 @@ resources:
       - name: workspace
       platform: linux
       params:
-        FLY_TARGET: ((fly-target))
         CONCOURSE_URL: ((concourse-url))
         CONCOURSE_USERNAME: ((concourse-username))
         CONCOURSE_PASSWORD: ((concourse-password))
-        PIPELINE_PREFIX: ((pipeline-prefix))main
+        MAIN_PIPELINE_NAME: ((pipeline-prefix))main
         JOB_NAME: {{job_name}}
         JOB_COUNT: 50
         CONCOURSE_TEAM: ((concourse-team))
@@ -83,7 +82,7 @@ resources:
           API_TOKEN=$(yq -r .targets.${TARGET_NAME}.token.value ~/.flyrc)
           python3 geode-ci/ci/bin/concourse_job_performance.py \
             ${CONCOURSE_URL} \
-            ${PIPELINE_PREFIX} \
+            ${MAIN_PIPELINE_NAME} \
             ${JOB_NAME} \
             ${JOB_COUNT} \
             --team="${CONCOURSE_TEAM}" \
