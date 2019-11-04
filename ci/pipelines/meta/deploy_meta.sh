@@ -108,7 +108,7 @@ YML
     -p ${META_PIPELINE} \
     --config ${SCRIPTDIR}/generated-pipeline.yml \
     --var artifact-bucket=${ARTIFACT_BUCKET} \
-    --var concourse-team=main \
+    --var concourse-team=${CONCOURSE_TEAM} \
     --var concourse-url=${CONCOURSE_URL} \
     --var gcp-project=${GCP_PROJECT} \
     --var geode-build-branch=${GEODE_BRANCH} \
@@ -121,7 +121,8 @@ YML
     --var sanitized-geode-fork=${SANITIZED_GEODE_FORK} \
     --var semver-prerelease-token="${SEMVER_PRERELEASE_TOKEN}" \
     --var upstream-fork=${UPSTREAM_FORK} \
-    --yaml-var public-pipelines=${PUBLIC} 2>&1 |tee flyOutput.log
+    --var fly-target=${FLY_TARGET} \
+    --yaml-var public-pipelines=${PUBLIC}
 
   if [[ "$(tail -n1 flyOutput.log)" == "bailing out" ]]; then
     exit 1

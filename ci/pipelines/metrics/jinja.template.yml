@@ -58,15 +58,37 @@ resources:
       outputs:
       - name: workspace
       platform: linux
+      params:
+        FLY_TARGET: ((fly-target))
+        CONCOURSE_URL: ((concourse-url))
+        CONCOURSE_USERNAME: ((concourse-username))
+        CONCOURSE_PASSWORD: ((concourse-password))
+        PIPELINE_PREFIX: ((pipeline-prefix))main
+        JOB_NAME: {{job_name}}
+        JOB_COUNT: 50
+        CONCOURSE_TEAM: ((concourse-team))
       run:
-        path: /usr/bin/python3
+        path: bash
         args:
-        - geode-ci/ci/bin/concourse_job_performance.py
-        - ((concourse-url))
-        - ((pipeline-prefix))main
-        - {{job_name}}
-        - 50
-        - '--team=support-versions'
+        - -ecx
+        - |-
+          apk add jq &> /dev/null
+          pip install yq &> /dev/null
+          apk add curl &> /dev/null
+          curl "${CONCOURSE_URL}/api/v1/cli?arch=amd64&platform=linux" --output fly
+          chmod +x fly
+          TARGET_NAME=concourse
+          set +x
+          ./fly -t ${TARGET_NAME} login -c "${CONCOURSE_URL}" -n "${CONCOURSE_TEAM}" -u "${CONCOURSE_USERNAME}" -p "${CONCOURSE_PASSWORD}"
+          API_TOKEN=$(yq -r .targets.${TARGET_NAME}.token.value ~/.flyrc)
+          python3 geode-ci/ci/bin/concourse_job_performance.py \
+            ${CONCOURSE_URL} \
+            ${PIPELINE_PREFIX} \
+            ${JOB_NAME} \
+            ${JOB_COUNT} \
+            --team="${CONCOURSE_TEAM}" \
+            --cookie-token="${API_TOKEN}"
+          set -x
 
 {%- endmacro %}
 
