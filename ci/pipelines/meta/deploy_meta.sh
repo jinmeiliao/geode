@@ -101,7 +101,12 @@ repository:
   public: ${REPOSITORY_PUBLIC}
 YML
 
-  python3 ../render.py jinja.template.yml --variable-file ../shared/jinja.variables.yml repository.yml --environment ../shared/ --output ${SCRIPTDIR}/generated-pipeline.yml --debug || exit 1
+  cat > pipelineProperties.yml <<YML
+pipelineProperties:
+  public: ${PUBLIC}
+YML
+
+  python3 ../render.py jinja.template.yml --variable-file ../shared/jinja.variables.yml repository.yml  pipelineProperties.yml --environment ../shared/ --output ${SCRIPTDIR}/generated-pipeline.yml --debug || exit 1
 
   fly -t ${FLY_TARGET} login -n ${CONCOURSE_TEAM}
   fly -t ${FLY_TARGET} sync
