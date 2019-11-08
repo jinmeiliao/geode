@@ -134,7 +134,6 @@ YML
 
 popd 2>&1 > /dev/null
 
-
 # bootstrap all precursors of the actual Build job
 
 function jobStatus {
@@ -238,6 +237,13 @@ function driveToGreen {
   fi
 }
 
+function enableFeature {
+  NAME=$1
+  driveToGreen $META_PIPELINE set-$NAME-pipeline
+  unpausePipeline ${PIPELINE_PREFIX}$NAME
+  exposePipeline ${PIPELINE_PREFIX}$NAME
+}
+
 set -e
 set +x
 
@@ -263,14 +269,14 @@ driveToGreen ${PIPELINE_PREFIX}images build-google-geode-builder
 driveToGreen ${PIPELINE_PREFIX}images build-google-windows-geode-builder
 driveToGreen $META_PIPELINE set-pipeline
 unpausePipeline ${PIPELINE_PREFIX}main
-echo "Successfully deployed ${CONCOURSE_URL}/teams/main/pipelines/${PIPELINE_PREFIX}main"
 
 if [[ "$GEODE_FORK" == "${UPSTREAM_FORK}" ]]; then
-  unpauseJobs set-metrics-pipeline
-  driveToGreen $META_PIPELINE set-metrics-pipeline
-  exposePipelines ${PIPELINE_PREFIX}main ${PIPELINE_PREFIX}metrics ${PIPELINE_PREFIX}images
+  exposePipelines ${PIPELINE_PREFIX}main ${PIPELINE_PREFIX}images
+  enableFeature metrics
+  enableFeature examples
   if [[ "$GEODE_BRANCH" == "develop" ]]; then
-    unpauseJobs set-pr-pipeline set-examples-pipeline
-    exposePipelines ${PIPELINE_PREFIX}pr ${PIPELINE_PREFIX}examples
+    enableFeature pr
   fi
 fi
+
+echo "Successfully deployed ${CONCOURSE_URL}/teams/main/pipelines/${PIPELINE_PREFIX}main"
