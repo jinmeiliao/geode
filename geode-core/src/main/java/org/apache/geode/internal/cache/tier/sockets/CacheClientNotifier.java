@@ -160,6 +160,11 @@ public class CacheClientNotifier {
     return ccnSingleton;
   }
 
+  @VisibleForTesting
+  public static void resetInstance() {
+    ccnSingleton = null;
+  }
+
   /**
    * Registers a new client updater that wants to receive updates with this server.
    *

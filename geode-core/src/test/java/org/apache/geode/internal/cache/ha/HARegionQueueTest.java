@@ -31,6 +31,7 @@ import org.apache.geode.CancelCriterion;
 import org.apache.geode.internal.cache.EventID;
 import org.apache.geode.internal.cache.HARegion;
 import org.apache.geode.internal.cache.InternalCache;
+import org.apache.geode.internal.cache.tier.sockets.CacheClientNotifier;
 import org.apache.geode.internal.util.concurrent.StoppableReentrantReadWriteLock;
 import org.apache.geode.test.junit.categories.ClientSubscriptionTest;
 
@@ -65,6 +66,8 @@ public class HARegionQueueTest {
     haRegionQueue = new HARegionQueue("haRegion", haRegion, internalCache,
         new HAContainerMap(new ConcurrentHashMap()), null, (byte) 1, true,
         mock(HARegionQueueStats.class), giiLock, rwLock, mock(CancelCriterion.class), false);
+
+    CacheClientNotifier.resetInstance();
   }
 
   @Test
