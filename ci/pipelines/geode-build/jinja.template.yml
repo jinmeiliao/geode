@@ -101,7 +101,9 @@ groups:
   {%- if repository.upstream_fork != "apache" or repository.branch == "develop" %}
   - PublishArtifacts
   {%- endif %}
-  - Benchmark
+  {%- for flavor in (benchmarks.flavors) %}
+  - Benchmark{{flavor.title}}
+  {%- endfor %}
 - name: complete
   jobs:
   - {{ build_test.name }}
@@ -114,7 +116,9 @@ groups:
   {%- if repository.upstream_fork != "apache" or repository.branch == "develop" %}
   - PublishArtifacts
   {%- endif %}
-  - Benchmark
+  {%- for flavor in (benchmarks.flavors) %}
+  - Benchmark{{flavor.title}}
+  {%- endfor %}
 - name: linux
   jobs:
   - {{ build_test.name }}
@@ -123,7 +127,9 @@ groups:
   - {{test.name}}Test{{java_test_version.name}}
     {%- endfor -%}
   {%- endfor %}
-  - Benchmark
+  {%- for flavor in (benchmarks.flavors) %}
+  - Benchmark{{flavor.title}}
+  {%- endfor %}
 - name: windows
   jobs:
   - {{ build_test.name }}
@@ -408,7 +414,9 @@ jobs:
 {%- if repository.upstream_fork != "apache" or repository.branch == "develop" %}
       - PublishArtifacts
 {% else %}
-      - Benchmark
+      {% for flavor in (benchmarks.flavors) %}
+      - Benchmark{{flavor.title}}
+      {% endfor %}
 {% endif %}
       trigger: true
     - get: geode-build-version
@@ -426,8 +434,8 @@ jobs:
       run:
         path: bash
         args:
-        - -ecx
-        - |-
+        - -cx
+        - |
           pushd geode
             GEODE_SHA=$(git rev-parse HEAD)
           popd
@@ -453,7 +461,8 @@ jobs:
       params:
         file: geode-passing-tokens/*.json
 
-- name: Benchmark
+{% for run_var in (benchmarks.flavors) %}
+- name: Benchmark{{ run_var.title }}
   public: true
   max_in_flight: 3
   plan:
@@ -472,8 +481,7 @@ jobs:
       passed:
       {{ all_gating_jobs() | indent(6) }}
     - put: concourse-metadata-resource
-  - aggregate:
-    {% for run_var in [{'title': '', 'flag':'', 'options': ''}, {'title': '_with_ssl', 'flag': '-PwithSsl', 'options': '--tests=*GetBenchmark --tests=*PutBenchmark'}, {'title': '_with_security_manager', 'flag': '-PwithSecurityManager', 'options': '--tests=Partitioned*'}] %}
+  - do:
     - task: run_benchmarks{{ run_var.title }}
       image: alpine-tools-image
       config:
@@ -525,7 +533,7 @@ jobs:
             - name: geode-benchmarks
             - name: concourse-metadata-resource
             - name: results
-    {% endfor %}
+{% endfor %}
 {% if repository.upstream_fork != "apache" or repository.branch == "develop" %}
 - name: PublishArtifacts
   public: true
@@ -535,16 +543,20 @@ jobs:
     - Benchmark
   - get: alpine-tools-image
   - aggregate:
+    - get: geode-ci
+      passed: &publish-passed-inputs
+      {% for flavor in (benchmarks.flavors) %}
+      - Benchmark{{flavor.title}}
+      {% endfor %}
+    - get: alpine-tools-image
     - get: geode
-      passed:
-      - Benchmark
+      passed: *publish-passed-inputs
       trigger: true
     - get: linux-builder-image-family
   - aggregate:
     - get: geode-build-version
       trigger: true
-      passed:
-      - Benchmark
+      passed: *publish-passed-inputs
     - put: concourse-metadata-resource
     {{ init_retry()|indent(4) }}
   - task: create_instance
@@ -556,7 +568,6 @@ jobs:
         GEODE_BRANCH: {{repository.branch}}
         GEODE_FORK: {{repository.fork}}
         JAVA_BUILD_VERSION: {{ java_build_version.version }}
-        IMAGE_FAMILY_NAME: ((pipeline-prefix))linux-geode-builder
       run:
         path: geode-ci/ci/scripts/create_instance.sh
       inputs:
@@ -569,8 +580,8 @@ jobs:
       - name: instance-data
       - name: attempts-log
         path: new
-    timeout: 20m
-    attempts: 5
+    timeout: 15m
+    attempts: 10
   - task: rsync_code_up
     image: alpine-tools-image
     config:
