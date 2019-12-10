@@ -38,6 +38,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
 import org.apache.geode.management.api.ClusterManagementGetResult;
+import org.apache.geode.management.api.ClusterManagementListResult;
 import org.apache.geode.management.api.ClusterManagementService;
 import org.apache.geode.management.configuration.GatewayReceiver;
 
@@ -71,7 +72,7 @@ public class GatewayManagementControllerSpringTest {
     String receiverIdWithDot = "receiver.id";
     String requestPath = URI_VERSION + GATEWAY_RECEIVERS_ENDPOINTS + "/" + receiverIdWithDot;
 
-    when(cms.get(any())).thenReturn(new ClusterManagementGetResult<>());
+    when(cms.get(any())).thenReturn(new ClusterManagementListResult<>());
 
     context.perform(get(requestPath))
         .andExpect(status().is2xxSuccessful());

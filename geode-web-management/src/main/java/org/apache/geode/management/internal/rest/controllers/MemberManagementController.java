@@ -43,7 +43,7 @@ public class MemberManagementController extends AbstractManagementController {
               value = ".result | .runtimeInfo[] | {name:.memberName,status:.status}")})})
   @PreAuthorize("@securityService.authorize('CLUSTER', 'READ')")
   @GetMapping(MEMBER_ENDPOINT + "/{id:.+}")
-  public ClusterManagementGetResult<Member, MemberInformation> getMember(
+  public ClusterManagementListResult<Member, MemberInformation> getMember(
       @PathVariable(name = "id") String id) {
     Member config = new Member();
     config.setId(id);

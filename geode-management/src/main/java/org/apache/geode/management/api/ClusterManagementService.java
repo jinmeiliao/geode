@@ -82,7 +82,7 @@ public interface ClusterManagementService extends AutoCloseable {
    * @throws ClusterManagementException if unsuccessful or, no matching element is found, or
    *         multiple matches are found
    */
-  <T extends AbstractConfiguration<R>, R extends RuntimeInfo> ClusterManagementGetResult<T, R> get(
+  <T extends AbstractConfiguration<R>, R extends RuntimeInfo> ClusterManagementListResult<T, R> get(
       T config);
 
   /**

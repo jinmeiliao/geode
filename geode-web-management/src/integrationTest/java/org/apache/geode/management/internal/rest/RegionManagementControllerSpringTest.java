@@ -40,6 +40,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
 import org.apache.geode.management.api.ClusterManagementGetResult;
+import org.apache.geode.management.api.ClusterManagementListResult;
 import org.apache.geode.management.api.ClusterManagementRealizationResult;
 import org.apache.geode.management.api.ClusterManagementService;
 import org.apache.geode.management.configuration.Index;
@@ -77,7 +78,7 @@ public class RegionManagementControllerSpringTest {
     String requestPath = URI_VERSION + REGION_CONFIG_ENDPOINT
         + "/" + regionName + INDEXES + "/" + indexNameWithDot;
 
-    when(cms.get(any())).thenReturn(new ClusterManagementGetResult<>());
+    when(cms.get(any())).thenReturn(new ClusterManagementListResult<>());
 
     context.perform(get(requestPath))
         .andExpect(status().is2xxSuccessful());
@@ -95,7 +96,7 @@ public class RegionManagementControllerSpringTest {
     String regionNameWithDot = "region.name";
     String requestPath = URI_VERSION + REGION_CONFIG_ENDPOINT + "/" + regionNameWithDot;
 
-    when(cms.get(any())).thenReturn(new ClusterManagementGetResult<>());
+    when(cms.get(any())).thenReturn(new ClusterManagementListResult<>());
 
     context.perform(get(requestPath))
         .andExpect(status().is2xxSuccessful());

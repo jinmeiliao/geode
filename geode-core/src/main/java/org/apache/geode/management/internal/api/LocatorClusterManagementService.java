@@ -353,7 +353,7 @@ public class LocatorClusterManagementService implements ClusterManagementService
   }
 
   @Override
-  public <T extends AbstractConfiguration<R>, R extends RuntimeInfo> ClusterManagementGetResult<T, R> get(
+  public <T extends AbstractConfiguration<R>, R extends RuntimeInfo> ClusterManagementListResult<T, R> get(
       T config) {
     ClusterManagementListResult<T, R> list = list(config);
     List<ConfigurationResult<T, R>> result = list.getResult();
@@ -368,12 +368,7 @@ public class LocatorClusterManagementService implements ClusterManagementService
           config.getClass().getSimpleName() + " '" + config.getId() + "' does not exist.");
     }
 
-    if (size > 1) {
-      raise(StatusCode.ERROR,
-          "Expect only one matching " + config.getClass().getSimpleName() + ".");
-    }
-
-    return assertSuccessful(new ClusterManagementGetResult<>(list));
+    return assertSuccessful(list);
   }
 
   @Override

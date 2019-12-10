@@ -38,6 +38,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
 import org.apache.geode.management.api.ClusterManagementGetResult;
+import org.apache.geode.management.api.ClusterManagementListResult;
 import org.apache.geode.management.api.ClusterManagementService;
 import org.apache.geode.management.configuration.Member;
 
@@ -71,7 +72,7 @@ public class MemberManagementControllerSpringTest {
     String memberIdWithDot = "member.id";
     String requestPath = URI_VERSION + MEMBER_ENDPOINT + "/" + memberIdWithDot;
 
-    when(cms.get(any())).thenReturn(new ClusterManagementGetResult<>());
+    when(cms.get(any())).thenReturn(new ClusterManagementListResult<>());
 
     context.perform(get(requestPath))
         .andExpect(status().is2xxSuccessful());

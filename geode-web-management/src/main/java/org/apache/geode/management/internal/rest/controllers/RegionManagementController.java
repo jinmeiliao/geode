@@ -90,7 +90,7 @@ public class RegionManagementController extends AbstractManagementController {
           @ExtensionProperty(name = "jqFilter",
               value = ".result | .runtimeInfo[] + .configuration | {name:.name,type:.type,entryCount:.entryCount}")})})
   @GetMapping(REGION_CONFIG_ENDPOINT + "/{id:.+}")
-  public ClusterManagementGetResult<Region, RuntimeRegionInfo> getRegion(
+  public ClusterManagementListResult<Region, RuntimeRegionInfo> getRegion(
       @PathVariable(name = "id") String id) {
     securityService.authorize(Resource.CLUSTER, Operation.READ, id);
     Region config = new Region();
@@ -151,7 +151,7 @@ public class RegionManagementController extends AbstractManagementController {
               value = ".result | .configuration | {name:.name,expression:.expression}")})})
   @GetMapping(REGION_CONFIG_ENDPOINT + "/{regionName}" + INDEXES + "/{id:.+}")
   @PreAuthorize("@securityService.authorize('CLUSTER', 'READ', 'QUERY')")
-  public ClusterManagementGetResult<Index, RuntimeInfo> getIndex(
+  public ClusterManagementListResult<Index, RuntimeInfo> getIndex(
       @PathVariable String regionName,
       @PathVariable String id) {
 

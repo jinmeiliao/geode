@@ -39,6 +39,7 @@ import org.apache.geode.distributed.internal.InternalConfigurationPersistenceSer
 import org.apache.geode.distributed.internal.InternalLocator;
 import org.apache.geode.management.api.ClusterManagementException;
 import org.apache.geode.management.api.ClusterManagementGetResult;
+import org.apache.geode.management.api.ClusterManagementListResult;
 import org.apache.geode.management.api.ClusterManagementRealizationResult;
 import org.apache.geode.management.api.ClusterManagementResult;
 import org.apache.geode.management.api.ClusterManagementService;
@@ -110,8 +111,8 @@ public class ConfigurePDXDUnitTest {
         .hasMessageContaining("ENTITY_EXISTS: Pdx 'PDX' already exists in group cluster");
 
     // verify the get
-    ClusterManagementGetResult<Pdx, PdxInfo> getResult = client.get(new Pdx());
-    Pdx configResult = getResult.getConfigResult();
+    ClusterManagementListResult<Pdx, PdxInfo> getResult = client.get(new Pdx());
+    List<Pdx> configResult = getResult.getConfigResult();
     assertThat(configResult.isReadSerialized()).isTrue();
     assertThat(getResult.getRuntimeResult()).hasSize(0);
   }
