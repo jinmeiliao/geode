@@ -16,6 +16,7 @@
 package org.apache.geode.management.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.commons.lang3.StringUtils;
 
 import org.apache.geode.management.runtime.DeploymentInfo;
 
@@ -26,7 +27,10 @@ public class Deployment extends GroupableConfiguration<DeploymentInfo> {
   @Override
   @JsonIgnore
   public String getId() {
-    return getJarFileName();
+    if (StringUtils.isEmpty(getGroup())) {
+      return getJarFileName();
+    }
+    return getGroup() + ID_DELIMINATOR + getJarFileName();
   }
 
   public String getJarFileName() {

@@ -46,6 +46,7 @@ import org.apache.geode.management.runtime.RuntimeInfo;
 @Experimental
 public abstract class AbstractConfiguration<R extends RuntimeInfo>
     implements Identifiable<String>, JsonSerializable {
+  public static final String ID_DELIMINATOR = "-#-";
 
   /**
    * The reserved group name that represents the predefined "cluster" group.

@@ -95,7 +95,10 @@ public class Index extends GroupableConfiguration<RuntimeInfo> {
   @Override
   @JsonIgnore
   public String getId() {
-    return getName();
+    if (StringUtils.isEmpty(getGroup())) {
+      return getName();
+    }
+    return getGroup() + ID_DELIMINATOR + getName();
   }
 
   @Override

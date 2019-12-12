@@ -254,4 +254,10 @@ public class ListRegionManagementDunitTest {
     List<Region> regions = client.list(filter).getConfigResult();
     assertThat(regions).hasSize(0);
   }
+
+  @Test
+  public void getRegionInMultipleGroup() throws Exception {
+    filter.setName("customers3");
+    client.get(filter);
+  }
 }

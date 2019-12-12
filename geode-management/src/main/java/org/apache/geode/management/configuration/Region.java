@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.commons.lang3.StringUtils;
 
 import org.apache.geode.management.runtime.RuntimeRegionInfo;
 
@@ -66,7 +67,10 @@ public class Region extends GroupableConfiguration<RuntimeRegionInfo> {
   @Override
   @JsonIgnore
   public String getId() {
-    return getName();
+    if (StringUtils.isEmpty(getGroup())) {
+      return getName();
+    }
+    return getGroup() + ID_DELIMINATOR + getName();
   }
 
   public String getName() {
