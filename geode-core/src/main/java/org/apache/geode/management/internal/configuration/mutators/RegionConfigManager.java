@@ -30,6 +30,7 @@ import org.apache.geode.cache.configuration.RegionConfig;
 import org.apache.geode.distributed.ConfigurationPersistenceService;
 import org.apache.geode.lang.Identifiable;
 import org.apache.geode.management.configuration.Region;
+import org.apache.geode.management.configuration.SuperRegion;
 import org.apache.geode.management.internal.configuration.converters.RegionConverter;
 
 public class RegionConfigManager extends CacheConfigurationManager<Region> {
@@ -89,6 +90,11 @@ public class RegionConfigManager extends CacheConfigurationManager<Region> {
     if (!incomingType.equals(existingType)) {
       raiseIncompatibilityError(incoming, group, existing);
     }
+  }
+
+  @Override
+  public SuperRegion combine(List<Region> configResult) {
+    return new SuperRegion(configResult);
   }
 
   private void raiseIncompatibilityError(Region incoming, String group,

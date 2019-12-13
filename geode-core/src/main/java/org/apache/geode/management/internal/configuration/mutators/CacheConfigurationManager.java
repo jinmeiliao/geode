@@ -107,5 +107,4 @@ public abstract class CacheConfigurationManager<T extends AbstractConfiguration>
     });
     return success.get();
   }
-
 }

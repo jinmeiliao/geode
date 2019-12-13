@@ -356,11 +356,12 @@ public class LocatorClusterManagementService implements ClusterManagementService
   public <T extends AbstractConfiguration<R>, R extends RuntimeInfo> ClusterManagementGetResult<T, R> get(
       T config) {
     ClusterManagementListResult<T, R> list = list(config);
-    List<ConfigurationResult<T, R>> result = list.getResult();
+    List<ConfigurationResult<T, R>> listResult = list.getResult();
+    ConfigurationResult<T, R> getResult = new ConfigurationResult<>();
 
-    int size = result.size();
+    int size = listResult.size();
     if (config instanceof Member) {
-      size = result.get(0).getRuntimeInfo().size();
+      size = listResult.get(0).getRuntimeInfo().size();
     }
 
     if (size == 0) {
@@ -368,12 +369,19 @@ public class LocatorClusterManagementService implements ClusterManagementService
           config.getClass().getSimpleName() + " '" + config.getId() + "' does not exist.");
     }
 
-    if (size > 1) {
-      raise(StatusCode.ERROR,
-          "Expect only one matching " + config.getClass().getSimpleName() + ".");
+    if (size == 1) {
+      getResult = listResult.get(0);
+    } else {
+      ConfigurationManager<T> manager = getConfigurationManager(config);
+      T combined = manager.combine(list.getConfigResult());
+      getResult.setConfiguration(combined);
+      getResult.setRuntimeInfo(list.getRuntimeResult());
     }
 
-    return assertSuccessful(new ClusterManagementGetResult<>(list));
+    ClusterManagementGetResult<T, R> result = new ClusterManagementGetResult<>(list);
+    result.setResult(getResult);
+
+    return assertSuccessful(result);
   }
 
   @Override

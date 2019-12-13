@@ -34,4 +34,8 @@ public interface ConfigurationManager<T extends AbstractConfiguration> {
   boolean update(T config, String groupName);
 
   List<T> list(T filterConfig, String groupName);
+
+  default T combine(List<T> configResult) {
+    throw new IllegalStateException("Only one configuration is expected.");
+  }
 }

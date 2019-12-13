@@ -38,9 +38,8 @@ public class ClusterManagementGetResult<T extends AbstractConfiguration<R>, R ex
   /**
    * for internal use only
    */
-  public ClusterManagementGetResult(ClusterManagementListResult<T, R> singletonListResult) {
-    super(singletonListResult);
-    setResult(singletonListResult.getResult().get(0));
+  public ClusterManagementGetResult(ClusterManagementResult copyFrom) {
+    super(copyFrom);
   }
 
   private ConfigurationResult<T, R> result = null;
