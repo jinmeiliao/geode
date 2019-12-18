@@ -42,7 +42,7 @@ GEODE_SHA=$(git rev-parse --verify HEAD)
 GEODE_REPO=$(pwd)
 popd
 
-input= "$(pwd)/results/failedTests"
+input="$(pwd)/results/failedTests"
 
 pushd geode-benchmarks/infrastructure/scripts/aws/
 ./launch_cluster.sh -t ${CLUSTER_TAG} -c ${CLUSTER_COUNT} --ci
