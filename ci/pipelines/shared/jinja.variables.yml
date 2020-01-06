@@ -29,6 +29,7 @@ build_test:
   GRADLE_TASK: build
   PARALLEL_DUNIT: 'false'
   PARALLEL_GRADLE: 'false'
+  PLATFORM: linux
   RAM: '16'
   name: Build
 
