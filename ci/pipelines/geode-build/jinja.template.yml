@@ -538,7 +538,6 @@ jobs:
 - name: PublishArtifacts
   public: true
   plan:
-  - get: alpine-tools-image
   - aggregate:
     - get: geode-ci
       passed: &publish-passed-inputs
