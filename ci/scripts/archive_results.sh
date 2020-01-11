@@ -130,16 +130,16 @@ set +x
 
 echo ""
 printf "\033[92m=-=-=-=-=-=-=-=-=-=-=-=-=-=-=  Test Results URI =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n"
-printf "\033[92m${ARTIFACT_SCHEME}://${TEST_RESULTS_DESTINATION}\033[0m\n"
+printf "\033[92mhttp://gsproxy.gemfire.pivotal.io/${TEST_RESULTS_DESTINATION}\033[0m\n"
 printf "\033[92m=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n"
 printf "\n"
 
 printf "\033[92mTest report artifacts from this job are available at:\033[0m\n"
 printf "\n"
-printf "\033[92m${ARTIFACT_SCHEME}://${TEST_ARTIFACTS_DESTINATION}${FILENAME}\033[0m\n"
+printf "\033[92mhttp://gsproxy.gemfire.pivotal.io/${TEST_ARTIFACTS_DESTINATION}${FILENAME}\033[0m\n"
 
 if [ -n "${TAR_GEODE_BUILD_ARTIFACTS}" ] ; then
   printf "\033[92mBuild artifacts from this job are available at:\033[0m\n"
   printf "\n"
-  printf "\033[92m${ARTIFACT_SCHEME}://${BUILD_ARTIFACTS_DESTINATION}\033[0m\n"
+  printf "\033[92mhttp://gsproxy.gemfire.pivotal.io/${BUILD_ARTIFACTS_DESTINATION}\033[0m\n"
 fi
