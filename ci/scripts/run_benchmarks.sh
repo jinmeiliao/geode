@@ -37,9 +37,8 @@ RESULTS_DIR=$(pwd)/results/benchmarks-${CLUSTER_TAG}
 CLUSTER_COUNT=4
 BENCHMARKS_BRANCH=${BENCHMARKS_BRANCH:-develop}
 
-pushd geode; GEODE_REPO=rsync:$(pwd)
+pushd geode; GEODE_REPO=rsync:$(pwd); BASELINE_REPO=rsync:$(pwd)
 GEODE_SHA=$(git rev-parse --verify HEAD)
-GEODE_REPO=$(pwd)
 popd
 
 input="$(pwd)/results/failedTests"
@@ -69,7 +68,7 @@ do
   fi
 
   if [ -z "${BASELINE_VERSION}" ]; then
-    BASELINE_OPTION="-B ${BASELINE_BRANCH}"
+    BASELINE_OPTION="-B ${BASELINE_BRANCH} -R ${BASELINE_REPO}"
     METADATA_BASELINE="'benchmark_branch':'${BASELINE_BRANCH}'"
   else
     BASELINE_OPTION="-V ${BASELINE_VERSION}"
