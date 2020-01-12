@@ -37,7 +37,7 @@ RESULTS_DIR=$(pwd)/results/benchmarks-${CLUSTER_TAG}
 CLUSTER_COUNT=4
 BENCHMARKS_BRANCH=${BENCHMARKS_BRANCH:-develop}
 
-pushd geode
+pushd geode; GEODE_REPO=rsync:$(pwd)
 GEODE_SHA=$(git rev-parse --verify HEAD)
 GEODE_REPO=$(pwd)
 popd
@@ -78,7 +78,7 @@ do
 
   ./run_on_cluster.sh -t ${CLUSTER_TAG} -- pkill -9 java
   ./run_on_cluster.sh -t ${CLUSTER_TAG} -- rm /home/geode/locator10334view.dat;
-  ./run_against_baseline.sh -t ${CLUSTER_TAG} -b ${GEODE_SHA} ${BASELINE_OPTION} -e ${BENCHMARKS_BRANCH} -o ${RESULTS_DIR} -m "'source':'geode-ci',${METADATA_BASELINE},'baseline_branch':'${BASELINE_BRANCH}','geode_branch':'${GEODE_SHA}'" --ci -- ${FLAGS} ${TEST_OPTIONS}
+  ./run_against_baseline.sh -t ${CLUSTER_TAG} -b ${GEODE_SHA} -r ${GEODE_REPO} ${BASELINE_OPTION} -e ${BENCHMARKS_BRANCH} -o ${RESULTS_DIR} -m "'source':'geode-ci',${METADATA_BASELINE},'baseline_branch':'${BASELINE_BRANCH}','geode_branch':'${GEODE_SHA}'" --ci -- ${FLAGS} ${TEST_OPTIONS}
 
   if [[ $? -eq 0 ]]; then
     break;
