@@ -574,6 +574,7 @@ jobs:
         GEODE_BRANCH: {{repository.branch}}
         GEODE_FORK: {{repository.fork}}
         JAVA_BUILD_VERSION: {{ java_build_version.version }}
+        IMAGE_FAMILY_NAME: ((pipeline-prefix))linux-geode-builder
       run:
         path: geode-ci/ci/scripts/create_instance.sh
       inputs:
