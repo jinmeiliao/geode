@@ -90,9 +90,10 @@ public class GMSQuorumChecker implements QuorumChecker {
       return true;
     }
 
-    if (isDebugEnabled) {
-      logger.debug("beginning quorum check with {}", this);
-    }
+    resume(); // make sure this quorum checker is the JGroups receiver
+
+    logger.info("beginning quorum check with {}", this);
+
     sendPingMessages();
     quorumAchieved = waitForResponses(lastView.getMembers().size(), timeout);
     // If we did not achieve full quorum, calculate if we achieved quorum
