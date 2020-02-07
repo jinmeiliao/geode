@@ -44,6 +44,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.DTDHandler;
@@ -56,6 +57,7 @@ import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.AttributesImpl;
 
+import org.apache.geode.CancelException;
 import org.apache.geode.InternalGemFireException;
 import org.apache.geode.annotations.Immutable;
 import org.apache.geode.cache.AttributesFactory;
@@ -419,10 +421,10 @@ public class CacheXmlGenerator extends CacheXml implements XMLReader {
       pw.flush();
 
     } catch (Exception ex) {
-      RuntimeException ex2 = new RuntimeException(
-          "An Exception was thrown while generating XML.");
-      ex2.initCause(ex);
-      throw ex2;
+      if (ExceptionUtils.getRootCause(ex) instanceof CancelException) {
+        throw (CancelException) ExceptionUtils.getRootCause(ex);
+      }
+      throw new RuntimeException("An Exception was thrown while generating XML.", ex);
     }
   }
 

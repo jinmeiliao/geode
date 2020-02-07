@@ -41,6 +41,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 
 import org.apache.geode.CancelException;
+import org.apache.geode.annotations.VisibleForTesting;
 import org.apache.geode.annotations.internal.MakeNotStatic;
 import org.apache.geode.cache.CacheFactory;
 import org.apache.geode.cache.GemFireCache;
@@ -592,7 +593,7 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
    *
    * @since GemFire 5.7
    */
-  private void startDistributedSystem() throws UnknownHostException {
+  private void startDistributedSystem() throws UnknownHostException, IOException {
     InternalDistributedSystem existing = InternalDistributedSystem.getConnectedInstance();
     if (existing != null) {
       // LOG: changed from config to info
@@ -665,7 +666,7 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     }
   }
 
-  private void startCache(DistributedSystem ds) {
+  private void startCache(DistributedSystem ds) throws IOException {
     InternalCache internalCache = GemFireCacheImpl.getInstance();
     if (internalCache == null) {
       logger.info("Creating cache for locator.");
@@ -680,16 +681,19 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     startClusterManagementService();
   }
 
-  private void startClusterManagementService() {
+  @VisibleForTesting
+  void startClusterManagementService() throws IOException {
     startConfigurationPersistenceService();
+
+    InternalCache myCache = this.myCache;
 
     if (myCache == null) {
       return;
     }
 
     clusterManagementService =
-        new LocatorClusterManagementService(locator.myCache.getDistributionManager(),
-            locator.configurationPersistenceService);
+        new LocatorClusterManagementService(myCache.getDistributionManager(),
+            configurationPersistenceService);
 
     // start management rest service
     AgentUtil agentUtil = new AgentUtil(GemFireVersion.getGemFireVersion());
@@ -707,7 +711,6 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     Pair<String, Object> cmServiceAttr =
         new ImmutablePair<>(HttpService.CLUSTER_MANAGEMENT_SERVICE_CONTEXT_PARAM,
             clusterManagementService);
-
     if (Boolean.getBoolean(ClusterManagementService.FEATURE_FLAG)) {
       logger.info(
           "System Property " + ClusterManagementService.FEATURE_FLAG
@@ -987,12 +990,13 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
       } catch (IOException e) {
         logger.info("attempt to restart location services terminated", e);
       } finally {
+        shutdownHandled.set(false);
         if (!restarted) {
           stoppedForReconnect = false;
         }
         reconnected = restarted;
+        restartThread = null;
       }
-      InternalLocator.this.restartThread = null;
     });
     this.restartThread.start();
   }
@@ -1020,13 +1024,13 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
       QuorumChecker checker = null;
       while (ds.getReconnectedSystem() == null && !ds.isReconnectCancelled()) {
         if (checker == null) {
-          checker = this.myDs.getQuorumChecker();
+          checker = ds.getQuorumChecker();
           if (checker != null) {
             logger.info("The distributed system returned this quorum checker: {}", checker);
           }
         }
         if (checker != null && !tcpServerStarted) {
-          boolean start = checker.checkForQuorum(3L * this.myDs.getConfig().getMemberTimeout());
+          boolean start = checker.checkForQuorum(3L * ds.getConfig().getMemberTimeout());
           if (start) {
             // start up peer location. server location is started after the DS finishes
             // reconnecting
@@ -1045,9 +1049,7 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
         try {
           ds.waitUntilReconnected(waitTime, TimeUnit.MILLISECONDS);
         } catch (CancelException e) {
-          logger.info("Attempt to reconnect failed and further attempts have been terminated");
-          this.stoppedForReconnect = false;
-          return false;
+          continue; // DistributedSystem failed to restart - loop until it gives up
         }
       }
       InternalDistributedSystem newSystem = (InternalDistributedSystem) ds.getReconnectedSystem();
@@ -1448,12 +1450,12 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     }
 
     try {
-      if (locator.configurationPersistenceService == null) {
-        // locator.configurationPersistenceService will already be created in case of auto-reconnect
-        locator.configurationPersistenceService =
+      if (configurationPersistenceService == null) {
+        // configurationPersistenceService will already be created in case of auto-reconnect
+        configurationPersistenceService =
             new InternalConfigurationPersistenceService(locator.myCache);
       }
-      locator.configurationPersistenceService
+      configurationPersistenceService
           .initSharedConfiguration(locator.loadFromSharedConfigDir());
       logger.info(
           "Cluster configuration service start up completed successfully and is now running ....");
