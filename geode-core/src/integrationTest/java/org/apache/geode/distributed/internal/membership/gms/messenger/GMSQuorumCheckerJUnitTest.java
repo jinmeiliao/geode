@@ -19,6 +19,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -52,12 +53,13 @@ public class GMSQuorumCheckerJUnitTest {
   private JGAddress address;
 
   @Before
-  public void initMocks() {
+  public void initMocks() throws Exception {
     mockMembers = new InternalDistributedMember[12];
     for (int i = 0; i < mockMembers.length; i++) {
       mockMembers[i] = new InternalDistributedMember("localhost", 8888 + i);
     }
-    channel = mock(JChannel.class);
+    JChannel jchannel = new JChannel();
+    channel = spy(jchannel);
     address = mock(JGAddress.class);
     when(channel.getAddress()).thenReturn(new UUID());
     when(channel.down(any(Event.class))).thenReturn(mock(IpAddress.class));
