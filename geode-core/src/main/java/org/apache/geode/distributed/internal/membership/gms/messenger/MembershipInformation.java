@@ -30,14 +30,22 @@ public class MembershipInformation {
   private final JChannel channel;
   private final Set<DistributedMember> membershipIdentifiers;
   private final Queue<Message> queuedMessages;
+  private final GMSEncrypt encrypt;
 
   protected MembershipInformation(JChannel channel,
       Set<DistributedMember> oldMembershipIdentifiers,
-      Queue<Message> queuedMessages) {
+      Queue<Message> queuedMessages,
+      GMSEncrypt encrypt) {
 
     this.channel = channel;
     this.membershipIdentifiers = oldMembershipIdentifiers;
     this.queuedMessages = queuedMessages;
+    this.encrypt = encrypt;
+  }
+
+
+  public GMSEncrypt getEncrypt() {
+    return encrypt;
   }
 
   public JChannel getChannel() {
