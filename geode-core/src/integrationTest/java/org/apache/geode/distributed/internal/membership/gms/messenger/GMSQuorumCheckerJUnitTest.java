@@ -78,7 +78,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertTrue(quorum);
@@ -98,7 +98,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertTrue(quorum);
@@ -113,7 +113,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertFalse(quorum);
@@ -127,7 +127,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertFalse(quorum);
@@ -154,7 +154,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertTrue(quorum);
@@ -184,7 +184,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertTrue(quorum);
@@ -217,7 +217,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertFalse(quorum);
@@ -248,7 +248,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertFalse(quorum);
@@ -272,7 +272,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertTrue(quorum);
@@ -297,7 +297,7 @@ public class GMSQuorumCheckerJUnitTest {
     PingMessageAnswer answerer = new PingMessageAnswer(channel, pongResponders);
     Mockito.doAnswer(answerer).when(channel).send(any(Message.class));
 
-    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null);
+    GMSQuorumChecker qc = new GMSQuorumChecker(view, 51, channel, null, null);
     qc.initialize();
     boolean quorum = qc.checkForQuorum(500);
     assertFalse(quorum);

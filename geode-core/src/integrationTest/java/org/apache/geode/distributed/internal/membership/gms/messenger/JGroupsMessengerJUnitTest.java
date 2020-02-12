@@ -879,7 +879,7 @@ public class JGroupsMessengerJUnitTest {
     JChannel channel = messenger.myChannel;
     services.getConfig().getTransport().setOldDSMembershipInfo(new MembershipInformation(channel,
         Collections.singleton(new InternalDistributedMember("localhost", 10000)),
-        new ConcurrentLinkedQueue<>()));
+        new ConcurrentLinkedQueue<>(), null));
     JGroupsMessenger newMessenger = new JGroupsMessenger();
     newMessenger.init(services);
     newMessenger.start();
