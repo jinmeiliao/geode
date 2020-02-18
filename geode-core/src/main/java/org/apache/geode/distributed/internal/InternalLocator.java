@@ -189,6 +189,9 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
   private final AtomicBoolean shutdownHandled = new AtomicBoolean(false);
 
   private InternalConfigurationPersistenceService configurationPersistenceService;
+  // synchronization lock that ensures we only have one thread performing location services
+  // restart at a time
+  private final Object servicesRestartLock = new Object();
 
   private volatile boolean isSharedConfigurationStarted = false;
 
@@ -659,10 +662,7 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
 
       startCache(myDs);
 
-      logger.info("Locator started on {}",
-          thisLocator);
-
-      myDs.setDependentLocator(this);
+      logger.info("Locator started on {}", thisLocator);
     }
   }
 
@@ -822,7 +822,7 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
       // If we are already shutting down don't do all of this again.
       // But, give the server a bit of time to shut down so a new
       // locator can be created, if desired, when this method returns
-      if (!stopForReconnect && waitForDisconnect) {
+      if (waitForDisconnect) {
         long endOfWait = System.currentTimeMillis() + 60000;
         if (isDebugEnabled && this.server.isAlive()) {
           logger.debug("sleeping to wait for the locator server to shut down...");
@@ -886,10 +886,8 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     handleShutdown();
     logger.info("{} is stopped", this);
 
-    if (this.stoppedForReconnect) {
-      if (this.myDs != null) {
-        launchRestartThread();
-      }
+    if (stopForReconnect) {
+      launchRestartThread();
     }
   }
 
@@ -907,10 +905,6 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     if (this.productUseLog != null) {
       this.productUseLog.close();
     }
-    if (this.myDs != null) {
-      this.myDs.setDependentLocator(null);
-    }
-
     if (this.myCache != null && !this.stoppedForReconnect && !this.forcedDisconnect) {
       logger.info("Closing locator's cache");
       try {
@@ -980,22 +974,25 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
    */
   private void launchRestartThread() {
     String threadName = "Location services restart thread";
-    this.restartThread = new LoggingThread(threadName, () -> {
-      boolean restarted = false;
-      try {
-        restarted = attemptReconnect();
-        logger.info("attemptReconnect returned {}", restarted);
-      } catch (InterruptedException e) {
-        logger.info("attempt to restart location services was interrupted", e);
-      } catch (IOException e) {
-        logger.info("attempt to restart location services terminated", e);
-      } finally {
-        shutdownHandled.set(false);
-        if (!restarted) {
-          stoppedForReconnect = false;
+    restartThread = new LoggingThread(threadName, () -> {
+      synchronized (servicesRestartLock) {
+        stoppedForReconnect = true;
+        boolean restarted = false;
+        try {
+          restarted = attemptReconnect();
+          logger.info("attemptReconnect returned {}", restarted);
+        } catch (InterruptedException e) {
+          logger.info("attempt to restart location services was interrupted", e);
+        } catch (IOException e) {
+          logger.info("attempt to restart location services terminated", e);
+        } finally {
+          shutdownHandled.set(false);
+          if (!restarted) {
+            stoppedForReconnect = false;
+          }
+          reconnected = restarted;
+          restartThread = null;
         }
-        reconnected = restarted;
-        restartThread = null;
       }
     });
     this.restartThread.start();
@@ -1105,7 +1102,6 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     }
     this.myDs = newSystem;
     this.myCache = newCache;
-    this.myDs.setDependentLocator(this);
     logger.info("Locator restart: initializing TcpServer");
 
     try {
