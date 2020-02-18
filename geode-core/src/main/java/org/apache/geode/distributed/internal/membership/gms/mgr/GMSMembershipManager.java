@@ -1529,6 +1529,10 @@ public class GMSMembershipManager implements MembershipManager, Manager {
       services.setShutdownCause(e);
     }
 
+    if (cleanupTimer != null && !cleanupTimer.isCancelled()) {
+      cleanupTimer.cancel();
+    }
+
     if (this.directChannel != null) {
       this.directChannel.disconnect(e);
     }

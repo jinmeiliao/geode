@@ -202,7 +202,9 @@ public class TcpServer {
     this.shuttingDown = false;
     this.handler.restarting(ds, cache, sharedConfig);
     startServerThread();
-    this.executor = createExecutor(this.poolHelper);
+    if (this.executor == null || this.executor.isShutdown()) {
+      this.executor = createExecutor(this.poolHelper);
+    }
     log.info("TcpServer@" + System.identityHashCode(this)
         + " restarting: completed.  Server thread=" + this.serverThread + '@'
         + System.identityHashCode(this.serverThread) + ";alive=" + this.serverThread.isAlive());

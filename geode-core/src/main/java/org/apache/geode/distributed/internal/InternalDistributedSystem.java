@@ -894,13 +894,6 @@ public class InternalDistributedSystem extends DistributedSystem
   }
 
   /**
-   * record a locator as a dependent of this distributed system
-   */
-  void setDependentLocator(InternalLocator theLocator) {
-    startedLocator = theLocator;
-  }
-
-  /**
    * Used by DistributionManager to fix bug 33362
    */
   void setDM(DistributionManager dm) {
@@ -1571,8 +1564,8 @@ public class InternalDistributedSystem extends DistributedSystem
           dm.close();
           // we close the locator after the DM so that when split-brain detection
           // is enabled, loss of the locator doesn't cause the DM to croak
-          if (startedLocator != null && !isReconnectingDS) {
-            startedLocator.stop(forcedDisconnect, preparingForReconnect, false);
+          if (startedLocator != null) {
+            startedLocator.stop(forcedDisconnect, preparingForReconnect, true);
             startedLocator = null;
           }
         } finally { // timer canceled

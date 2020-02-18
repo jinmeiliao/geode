@@ -333,6 +333,10 @@ public class SystemTimer {
     }
   }
 
+  public boolean isCancelled() {
+    return cancelled;
+  }
+
   /**
    * @see Timer#schedule(TimerTask, long)
    */

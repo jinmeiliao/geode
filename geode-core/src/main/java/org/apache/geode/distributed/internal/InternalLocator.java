@@ -201,7 +201,12 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
   private DistributionConfigImpl distributionConfig;
   private WanLocatorDiscoverer locatorDiscoverer;
   private InternalConfigurationPersistenceService configurationPersistenceService;
-  private LocatorClusterManagementService clusterManagementService;
+  private LocatorClusterManagementService clusterManagementService; // synchronization lock that
+                                                                    // ensures we only have one
+                                                                    // thread performing location
+                                                                    // services
+  // restart at a time
+  private final Object servicesRestartLock = new Object();
 
   public static InternalLocator getLocator() {
     synchronized (locatorLock) {
@@ -708,8 +713,6 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
       startCache(internalDistributedSystem);
 
       logger.info("Locator started on {}", thisLocator);
-
-      internalDistributedSystem.setDependentLocator(this);
     }
   }
 
@@ -869,7 +872,7 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
       // If we are already shutting down don't do all of this again.
       // But, give the server a bit of time to shut down so a new
       // locator can be created, if desired, when this method returns
-      if (!stopForReconnect && waitForDisconnect) {
+      if (waitForDisconnect) {
         long endOfWait = System.currentTimeMillis() + 60000;
         if (isDebugEnabled && server.isAlive()) {
           logger.debug("sleeping to wait for the locator server to shut down...");
@@ -936,10 +939,8 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     handleShutdown();
     logger.info("{} is stopped", this);
 
-    if (stoppedForReconnect) {
-      if (internalDistributedSystem != null) {
-        launchRestartThread();
-      }
+    if (stopForReconnect) {
+      launchRestartThread();
     }
   }
 
@@ -958,10 +959,6 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     if (productUseLog != null) {
       productUseLog.close();
     }
-    if (internalDistributedSystem != null) {
-      internalDistributedSystem.setDependentLocator(null);
-    }
-
     if (internalCache != null && !stoppedForReconnect && !forcedDisconnect) {
       logger.info("Closing locator's cache");
       try {
@@ -1032,21 +1029,24 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
   private void launchRestartThread() {
     String threadName = "Location services restart thread";
     restartThread = new LoggingThread(threadName, () -> {
-      boolean restarted = false;
-      try {
-        restarted = attemptReconnect();
-        logger.info("attemptReconnect returned {}", restarted);
-      } catch (InterruptedException e) {
-        logger.info("attempt to restart location services was interrupted", e);
-      } catch (IOException e) {
-        logger.info("attempt to restart location services terminated", e);
-      } finally {
-        shutdownHandled.set(false);
-        if (!restarted) {
-          stoppedForReconnect = false;
+      synchronized (servicesRestartLock) {
+        stoppedForReconnect = true;
+        boolean restarted = false;
+        try {
+          restarted = attemptReconnect();
+          logger.info("attemptReconnect returned {}", restarted);
+        } catch (InterruptedException e) {
+          logger.info("attempt to restart location services was interrupted", e);
+        } catch (IOException e) {
+          logger.info("attempt to restart location services terminated", e);
+        } finally {
+          shutdownHandled.set(false);
+          if (!restarted) {
+            stoppedForReconnect = false;
+          }
+          reconnected = restarted;
+          restartThread = null;
         }
-        reconnected = restarted;
-        restartThread = null;
       }
     });
     restartThread.start();
@@ -1166,7 +1166,6 @@ public class InternalLocator extends Locator implements ConnectListener, LogConf
     }
     internalDistributedSystem = newSystem;
     internalCache = newCache;
-    internalDistributedSystem.setDependentLocator(this);
     logger.info("Locator restart: initializing TcpServer");
 
     try {
