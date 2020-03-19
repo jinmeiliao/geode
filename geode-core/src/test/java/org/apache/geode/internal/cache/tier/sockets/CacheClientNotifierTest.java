@@ -166,13 +166,12 @@ public class CacheClientNotifierTest {
     ConnectionListener connectionListener = mock(ConnectionListener.class);
     ClientProxyMembershipID clientProxyMembershipID = mock(ClientProxyMembershipID.class);
     ClientRegistrationMetadata clientRegistrationMetadata = mock(ClientRegistrationMetadata.class);
-    StatisticsClock statisticsClock = mock(StatisticsClock.class);
 
     when(clientRegistrationMetadata.getClientProxyMembershipID()).thenReturn(
         clientProxyMembershipID);
 
     CacheClientNotifier cacheClientNotifier = CacheClientNotifier.getInstance(internalCache,
-        new ClientRegistrationEventQueueManager(), statisticsClock, cacheServerStats, 0, 0,
+        new ClientRegistrationEventQueueManager(), cacheServerStats, 0, 0,
         connectionListener, null, false);
     LocalRegion region = mock(LocalRegion.class);
 
