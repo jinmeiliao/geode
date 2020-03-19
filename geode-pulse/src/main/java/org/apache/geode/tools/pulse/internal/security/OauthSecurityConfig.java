@@ -106,10 +106,10 @@ public class OauthSecurityConfig extends WebSecurityConfigurerAdapter {
   }
 
   @Autowired
-  GemFireAuthenticationProvider gemAuthenticationProvider;
+  OauthAuthenticationProvider oauthAuthenticationProvider;
 
   @Override
   protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) {
-    authenticationManagerBuilder.authenticationProvider(gemAuthenticationProvider);
+    authenticationManagerBuilder.authenticationProvider(oauthAuthenticationProvider);
   }
 }
