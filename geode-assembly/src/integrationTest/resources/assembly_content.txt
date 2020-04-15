@@ -1,6 +1,5 @@
 LICENSE
 NOTICE
-README.md
 bin/gfsh
 bin/gfsh-completion.bash
 bin/gfsh.bat
