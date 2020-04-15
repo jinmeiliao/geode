@@ -1,5 +1,6 @@
 LICENSE
 NOTICE
+README.md
 bin/gfsh
 bin/gfsh-completion.bash
 bin/gfsh.bat
@@ -903,12 +904,12 @@ lib/geode-cq-0.0.0.jar
 lib/geode-dependencies.jar
 lib/geode-jca-0.0.0.rar
 lib/geode-lucene-0.0.0.jar
-lib/geode-redis-0.0.0.jar
 lib/geode-management-0.0.0.jar
 lib/geode-old-client-support-0.0.0.jar
 lib/geode-protobuf-0.0.0.jar
 lib/geode-protobuf-messages-0.0.0.jar
 lib/geode-rebalancer-0.0.0.jar
+lib/geode-redis-0.0.0.jar
 lib/geode-wan-0.0.0.jar
 lib/geode-web-0.0.0.jar
 lib/gfsh-dependencies.jar
@@ -916,9 +917,9 @@ lib/grumpy-core-0.2.2.jar
 lib/httpclient-4.5.6.jar
 lib/httpcore-4.4.10.jar
 lib/istack-commons-runtime-2.2.jar
-lib/jackson-annotations-2.9.8.jar
-lib/jackson-core-2.9.8.jar
-lib/jackson-databind-2.9.8.jar
+lib/jackson-annotations-2.9.10.jar
+lib/jackson-core-2.9.10.jar
+lib/jackson-databind-2.9.10.4.jar
 lib/jansi-1.17.1.jar
 lib/javax.activation-1.2.0.jar
 lib/javax.activation-api-1.2.0.jar
