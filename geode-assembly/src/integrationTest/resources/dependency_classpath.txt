@@ -30,9 +30,9 @@ grumpy-core-0.2.2.jar
 httpclient-4.5.6.jar
 httpcore-4.4.10.jar
 istack-commons-runtime-2.2.jar
-jackson-annotations-2.9.8.jar
-jackson-core-2.9.8.jar
-jackson-databind-2.9.8.jar
+jackson-annotations-2.9.10.jar
+jackson-core-2.9.10.jar
+jackson-databind-2.9.10.4.jar
 jansi-1.17.1.jar
 javax.activation-1.2.0.jar
 javax.activation-api-1.2.0.jar
