@@ -18,7 +18,7 @@
 benchmarks:
   baseline_branch: ''
   baseline_version: '1.10.0'
-  benchmark_branch: develop
+  benchmark_branch: support/1.10
   flavors:
   - title: '_base'
     flag: ''
