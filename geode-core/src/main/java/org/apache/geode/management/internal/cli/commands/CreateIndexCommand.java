@@ -23,17 +23,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import joptsimple.internal.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
 import org.apache.geode.annotations.Immutable;
+import org.apache.geode.cache.configuration.CacheConfig;
 import org.apache.geode.cache.configuration.RegionConfig;
 import org.apache.geode.cache.query.IndexType;
+import org.apache.geode.distributed.ConfigurationPersistenceService;
 import org.apache.geode.distributed.DistributedMember;
 import org.apache.geode.distributed.internal.InternalConfigurationPersistenceService;
-import org.apache.geode.management.api.ClusterManagementService;
-import org.apache.geode.management.api.ConfigurationResult;
 import org.apache.geode.management.cli.CliMetaData;
 import org.apache.geode.management.cli.ConverterHint;
 import org.apache.geode.management.cli.GfshCommand;
@@ -43,7 +43,6 @@ import org.apache.geode.management.internal.cli.i18n.CliStrings;
 import org.apache.geode.management.internal.cli.result.model.InfoResultModel;
 import org.apache.geode.management.internal.cli.result.model.ResultModel;
 import org.apache.geode.management.internal.security.ResourceOperation;
-import org.apache.geode.management.runtime.RuntimeRegionInfo;
 import org.apache.geode.security.ResourcePermission;
 
 public class CreateIndexCommand extends GfshCommand {
@@ -78,7 +77,6 @@ public class CreateIndexCommand extends GfshCommand {
 
     // first find out what groups this region belongs to when using cluster configuration
     InternalConfigurationPersistenceService ccService = getConfigurationPersistenceService();
-    ClusterManagementService cms = getClusterManagementService();
     final Set<DistributedMember> targetMembers;
     ResultModel resultModel = new ResultModel();
     InfoResultModel info = resultModel.addInfo();
@@ -86,23 +84,27 @@ public class CreateIndexCommand extends GfshCommand {
     // if cluster management service is enabled and user did not specify a member id, then
     // we will find the applicable members based on the what group this region is on
     if (ccService != null && memberNameOrID == null) {
-      regionName = getValidRegionName(regionPath, cms);
-      RegionConfig config = getRegionConfig(cms, regionName);
-      if (config == null) {
+      regionName = getValidRegionName(regionPath);
+      Set<String> calculatedGroups = getGroupsContainingRegion(ccService, regionName);
+      if (calculatedGroups.isEmpty()) {
         return ResultModel.createError("Region " + regionName + " does not exist.");
       }
-      String[] calculatedGroups = config.getGroups().toArray(new String[0]);
-      if (groups != null && !containsExactlyInAnyOrder(groups, calculatedGroups)) {
-        info.addLine("--groups=" + Strings.join(groups, ",") + " is ignored.");
+      if (groups != null && !calculatedGroups.containsAll(Arrays.asList(groups))) {
+        return ResultModel
+            .createError("Region " + regionName + " does not exist in some of the groups.");
       }
-      groups = calculatedGroups;
+      if (groups == null) {
+        // the calculatedGroups will have "cluster" value to indicate the "cluster" level, in thise
+        // case we want the groups to an empty array
+        groups = calculatedGroups.stream().filter(s -> !"cluster".equals(s))
+            .toArray(String[]::new);
+      }
       targetMembers = findMembers(groups, null);
     }
     // otherwise use the group/members specified in the option to find the applicable members.
     else {
       targetMembers = findMembers(groups, memberNameOrID);
     }
-
     if (targetMembers.isEmpty()) {
       return ResultModel.createError(CliStrings.NO_MEMBERS_FOUND_MESSAGE);
     }
@@ -129,8 +131,7 @@ public class CreateIndexCommand extends GfshCommand {
     // update the cluster configuration. Can't use SingleGfshCommand to do the update since in some
     // cases
     // groups information is inferred by the region, and the --group option might have the wrong
-    // group
-    // information.
+    // group information.
     if (ccService == null) {
       info.addLine(SERVICE_NOT_RUNNING_CHANGE_NOT_PERSISTED);
       return resultModel;
@@ -164,39 +165,28 @@ public class CreateIndexCommand extends GfshCommand {
 
   // find a valid regionName when regionPath passed in is in the form of
   // "/region1.fieldName.fieldName x"
-  // this also handles the possibility when regionName has "." in it, like "/A.B". It's stripping
-  // . part one by one and check if the remaining part is a valid region name or not. If we
-  // could not find a region with any part of the name, (like, couldn't find A.B or A), then A is
-  // returned.
-  String getValidRegionName(String regionPath, ClusterManagementService cms) {
-    // Check to see if the region path contains an alias e.g "/region1 r1"
-    // Then the first string will be the regionPath
+  // since we can't create index on regions with . in it's name, we will assume tht regionName
+  // returned here should not have "."
+  String getValidRegionName(String regionPath) {
     String regionName = regionPath.trim().split(" ")[0];
-    // check to see if the region path is in the form of "--region=region.entrySet() z"
-    while (regionName.contains(".")) {
-      RegionConfig region = getRegionConfig(cms, regionName);
-      if (region != null) {
-        break;
-      }
-      // otherwise, strip one more . part off the regionName
-      else {
-        regionName = regionName.substring(0, regionName.lastIndexOf("."));
-      }
+    regionName = StringUtils.removeStart(regionName, "/");
+    if (regionName.contains(".")) {
+      regionName = regionName.substring(0, regionName.indexOf('.'));
     }
     return regionName;
   }
 
-  RegionConfig getRegionConfig(ClusterManagementService cms,
+  // if region belongs to "cluster" level, it will return a set containing "cluster" string
+  Set<String> getGroupsContainingRegion(ConfigurationPersistenceService cps,
       String regionName) {
-    RegionConfig regionConfig = new RegionConfig();
-    regionConfig.setName(regionName);
-    List<ConfigurationResult<RegionConfig, RuntimeRegionInfo>> list =
-        cms.list(regionConfig).getResult();
-    if (list.isEmpty()) {
-      return null;
-    } else {
-      return list.get(0).getConfig();
+    Set<String> foundGroups = new HashSet<>();
+    for (String group : cps.getGroups()) {
+      CacheConfig cacheConfig = cps.getCacheConfig(group, true);
+      if (cacheConfig.findRegionConfiguration(regionName) != null) {
+        foundGroups.add(group);
+      }
     }
+    return foundGroups;
   }
 
 

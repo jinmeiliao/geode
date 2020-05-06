@@ -1026,11 +1026,22 @@ public class CacheConfig {
     this.version = value;
   }
 
+  // this supports looking for sub regions
   public RegionConfig findRegionConfiguration(String regionPath) {
     if (regionPath.startsWith(SEPARATOR)) {
       regionPath = regionPath.substring(1);
     }
-    return findElement(getRegions(), regionPath);
+    List<RegionConfig> regions = getRegions();
+    RegionConfig found = null;
+    for (String regionToken : regionPath.split(SEPARATOR)) {
+      found = findElement(regions, regionToken);
+      // couldn't find one of the sub regions, break out of the loop
+      if (found == null) {
+        return null;
+      }
+      regions = found.getRegions();
+    }
+    return found;
   }
 
   public <T extends CacheElement> List<T> findCustomCacheElements(Class<T> classT) {
