@@ -1839,7 +1839,7 @@ public class Connection implements Runnable {
         if (inputBuffer != null) {
           getBufferPool().releaseReceiveBuffer(inputBuffer);
         }
-        inputBuffer = getBufferPool().acquireNonDirectReceiveBuffer(packetBufferSize);
+        inputBuffer = getBufferPool().acquireDirectReceiveBuffer(packetBufferSize);
       }
       if (channel.socket().getReceiveBufferSize() < packetBufferSize) {
         channel.socket().setReceiveBufferSize(packetBufferSize);
@@ -1882,13 +1882,8 @@ public class Connection implements Runnable {
     }
 
     msg = msg.toLowerCase();
-
-    if (e instanceof SSLException && msg.contains("status = closed")) {
-      return true; // engine has been closed - this is normal
-    }
-
-    return (msg.contains("forcibly closed") || msg.contains("reset by peer")
-        || msg.contains("connection reset") || msg.contains("socket is closed"));
+    return (msg.contains("forcibly closed")) || (msg.contains("reset by peer"))
+        || (msg.contains("connection reset"));
   }
 
   private static boolean validMsgType(int msgType) {
