@@ -279,7 +279,7 @@ if [[ "$GEODE_FORK" == "${UPSTREAM_FORK}" ]]; then
     enableFeature metrics
     enableFeature examples
   fi
-  if [[ "$GEODE_BRANCH" == "develop" ]]; then
+  if [[ "$GEODE_BRANCH" == "support/9.9" ]]; then
     enableFeature pr
   fi
 fi
