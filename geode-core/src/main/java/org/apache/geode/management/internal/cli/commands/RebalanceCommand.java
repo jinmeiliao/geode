@@ -78,7 +78,7 @@ public class RebalanceCommand extends GfshCommand {
       throws Exception {
 
     ExecutorService commandExecutors =
-        LoggingExecutors.newSingleThreadExecutor("RebalanceCommand", false);
+        LoggingExecutors.newSingleThreadExecutor("RebalanceCommand", true);
     List<Future<ResultModel>> commandResult = new ArrayList<>();
     ResultModel result;
     try {
@@ -217,11 +217,10 @@ public class RebalanceCommand extends GfshCommand {
 
   // TODO EY Move this to its own class
   private class ExecuteRebalanceWithTimeout implements Callable<ResultModel> {
-
-    String[] includeRegions = null;
-    String[] excludeRegions = null;
     boolean simulate;
-    InternalCache cache = null;
+    InternalCache cache;
+    String[] includeRegions;
+    String[] excludeRegions;
 
     @Override
     public ResultModel call() throws Exception {

@@ -16,6 +16,7 @@ package org.apache.geode.management.internal.cli.commands;
 
 
 import static org.apache.geode.test.junit.rules.GfshCommandRule.PortType.jmxManager;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -97,5 +98,29 @@ public class RebalanceCommandDistributedTestBase {
         region.put("key" + (i + 200), "value" + (i + 200));
       }
     });
+  }
+
+  /**
+   * See GEODE-8071.
+   * The test asserts that the amount of non-daemon threads on the locator VM remains constant
+   * before and after executing the re-balance command.
+   */
+  @Test
+  public void rebalanceCommandShouldNotLaunchNonDaemonThreads() {
+    long nonDaemonThreadsBeforeCommand = locator.invoke(() -> Thread.getAllStackTraces()
+        .keySet()
+        .stream()
+        .filter(thread -> !thread.isDaemon())
+        .count());
+
+    gfsh.executeAndAssertThat("rebalance").statusIsSuccess();
+
+    long daemonThreadsAfterCommand = locator.invoke(() -> Thread.getAllStackTraces()
+        .keySet()
+        .stream()
+        .filter(thread -> !thread.isDaemon())
+        .count());
+
+    assertThat(daemonThreadsAfterCommand).isEqualTo(nonDaemonThreadsBeforeCommand);
   }
 }
