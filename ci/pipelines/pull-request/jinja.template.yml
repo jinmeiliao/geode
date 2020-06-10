@@ -32,7 +32,6 @@ resources:
 - name: geode
   type: pull-request
   source:
-    base_branch: ((geode-build-branch))
     access_token: ((!github-pr-access-token))
     ignore_paths:
     - geode-docs/*
