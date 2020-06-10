@@ -325,6 +325,7 @@ public class DirectChannel {
         final List cons = new ArrayList(destinations.length);
         ConnectExceptions ce = getConnections(mgr, msg, destinations, orderedMsg, retry, ackTimeout,
             ackSDTimeout, cons);
+
         if (directReply && msg.getProcessorId() > 0) { // no longer a direct-reply message?
           directReply = false;
         }

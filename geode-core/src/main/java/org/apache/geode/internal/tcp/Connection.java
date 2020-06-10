@@ -1372,7 +1372,7 @@ public class Connection implements Runnable {
    * Invoking this method ensures that the proper synchronization is done.
    */
   void requestClose(String reason) {
-    close(reason, true, true, false, false);
+    close(reason, true, false, false, false);
   }
 
   boolean isClosing() {
@@ -1636,7 +1636,7 @@ public class Connection implements Runnable {
   }
 
   private void readMessages() {
-    // take a snapshot of uniqueId to detect reconnect attempts; see bug 37592
+    // take a snapshot of uniqueId to detect reconnect attempts
     SocketChannel channel;
     try {
       channel = getSocket().getChannel();
@@ -3454,13 +3454,9 @@ public class Connection implements Runnable {
 
   @Override
   public String toString() {
-    return String.valueOf(remoteAddr) + '@' + this.uniqueId
-        + (this.remoteVersion != null ? ('(' + this.remoteVersion.toString() + ')')
-            : "") /*
-                   * DEBUG + " accepted=" + this.isReceiver + " connected=" + this.connected +
-                   * " hash=" + System.identityHashCode(this) + " preserveOrder=" +
-                   * this.preserveOrder + " closing=" + isClosing() + ">"
-                   */;
+    return remoteAddr + "(uid=" + uniqueId + ")"
+        + (remoteVersion != null && remoteVersion != Version.CURRENT
+            ? "(v" + remoteVersion.toString() + ')' : "");
   }
 
   /**
