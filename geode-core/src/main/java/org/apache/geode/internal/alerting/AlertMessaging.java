@@ -14,10 +14,14 @@
  */
 package org.apache.geode.internal.alerting;
 
+import static org.apache.geode.internal.logging.LoggingExecutors.newFixedThreadPool;
+
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.logging.log4j.Logger;
 
+import org.apache.geode.annotations.VisibleForTesting;
 import org.apache.geode.distributed.DistributedMember;
 import org.apache.geode.distributed.internal.ClusterDistributionManager;
 import org.apache.geode.distributed.internal.DistributionManager;
@@ -37,47 +41,65 @@ public class AlertMessaging {
   private final InternalDistributedSystem system;
   private final DistributionManager dm;
   private final AlertListenerMessageFactory alertListenerMessageFactory;
+  private final ExecutorService executor;
 
   public AlertMessaging(final InternalDistributedSystem system) {
-    this(system, system.getDistributionManager(), new AlertListenerMessageFactory());
+    this(system, system.getDistributionManager(), new AlertListenerMessageFactory(),
+        newFixedThreadPool("AlertingMessaging Processor", true, 1));
   }
 
+  @VisibleForTesting
   AlertMessaging(final InternalDistributedSystem system,
       final DistributionManager dm,
-      final AlertListenerMessageFactory alertListenerMessageFactory) {
+      final AlertListenerMessageFactory alertListenerMessageFactory,
+      final ExecutorService executor) {
     this.system = system;
     this.dm = dm;
     this.alertListenerMessageFactory = alertListenerMessageFactory;
+    this.executor = executor;
   }
 
   public void sendAlert(final DistributedMember member,
       final AlertLevel alertLevel,
       final Date date,
       final String threadName,
+      final long threadId,
       final String formattedMessage,
       final String stackTrace) {
-    try {
-      String connectionName = system.getConfig().getName();
+    executor.submit(() -> AlertingAction.execute(() -> {
+      try {
+        String connectionName = system.getConfig().getName();
 
-      AlertListenerMessage message = alertListenerMessageFactory.createAlertListenerMessage(member,
-          alertLevel, date, connectionName, threadName, formattedMessage, stackTrace);
+        AlertListenerMessage message =
+            alertListenerMessageFactory.createAlertListenerMessage(member, alertLevel, date,
+                connectionName, threadName, threadId, formattedMessage, stackTrace);
 
-      if (member.equals(system.getDistributedMember())) {
-        // process in local member
-        logger.debug("Processing local alert message: {}, {}, {}, {}, {}, [{}], [{}].",
-            member, alertLevel, date, connectionName, threadName, formattedMessage, stackTrace);
-        processAlertListenerMessage(message);
+        if (member.equals(system.getDistributedMember())) {
+          // process in local member
+          logger.debug("Processing local alert message: {}, {}, {}, {}, {}, [{}], [{}].",
+              member, alertLevel, date, connectionName, threadName, formattedMessage, stackTrace);
+          processAlertListenerMessage(message);
 
-      } else {
-        // send to remote member
-        logger.debug("Sending remote alert message: {}, {}, {}, {}, {}, [{}], [{}].",
-            member, alertLevel, date, connectionName, threadName, formattedMessage, stackTrace);
-        dm.putOutgoing(message);
+        } else {
+          // send to remote member
+          logger.debug("Sending remote alert message: {}, {}, {}, {}, {}, [{}], [{}].",
+              member, alertLevel, date, connectionName, threadName, formattedMessage, stackTrace);
+          dm.putOutgoing(message);
+        }
+      } catch (ReenteredConnectException ignore) {
+        // OK. We can't send to this recipient because we're in the middle of
+        // trying to connect to it.
       }
-    } catch (ReenteredConnectException ignore) {
-      // OK. We can't send to this recipient because we're in the middle of
-      // trying to connect to it.
-    }
+    }));
+  }
+
+  public void close() {
+    executor.shutdownNow();
+  }
+
+  @Override
+  public String toString() {
+    return getClass().getName() + "@" + Integer.toHexString(hashCode());
   }
 
   void processAlertListenerMessage(final AlertListenerMessage message) {

@@ -58,6 +58,7 @@ import org.apache.geode.StatisticsType;
 import org.apache.geode.SystemConnectException;
 import org.apache.geode.SystemFailure;
 import org.apache.geode.annotations.Immutable;
+import org.apache.geode.annotations.VisibleForTesting;
 import org.apache.geode.annotations.internal.MakeNotStatic;
 import org.apache.geode.annotations.internal.MutableForTesting;
 import org.apache.geode.cache.CacheClosedException;
@@ -1861,6 +1862,11 @@ public class InternalDistributedSystem extends DistributedSystem
 
   public AlertingService getAlertingService() {
     return alertingService;
+  }
+
+  @VisibleForTesting
+  public AlertingSession getAlertingSession() {
+    return alertingSession;
   }
 
   @Override

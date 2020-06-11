@@ -48,7 +48,8 @@ public class AlertListenerMessageFactoryTest {
   @Test
   public void createAlertListenerMessage() {
     AlertListenerMessage message = alertListenerMessageFactory.createAlertListenerMessage(member,
-        AlertLevel.WARNING, new Date(), "connectionName", "threadName", "formattedMessage", null);
+        AlertLevel.WARNING, new Date(), "connectionName", "threadName", 1, "formattedMessage",
+        null);
 
     assertThat(message).isNotNull();
     assertThat(message.getDSFID()).isEqualTo(ALERT_LISTENER_MESSAGE);
@@ -61,7 +62,7 @@ public class AlertListenerMessageFactoryTest {
 
     Throwable thrown = catchThrowable(
         () -> alertListenerMessageFactory.createAlertListenerMessage(member, AlertLevel.WARNING,
-            new Date(), "connectionName", "threadName", "formattedMessage", null));
+            new Date(), "connectionName", "threadName", 1, "formattedMessage", null));
 
     assertThat(thrown).isNotNull().isInstanceOf(IllegalArgumentException.class);
   }

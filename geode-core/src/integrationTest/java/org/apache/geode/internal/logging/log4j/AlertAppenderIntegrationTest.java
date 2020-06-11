@@ -244,7 +244,7 @@ public class AlertAppenderIntegrationTest {
 
     assertThat(alertAppender.getLogEvents()).hasSize(1);
     verify(alertMessaging).sendAlert(eq(localMember), eq(AlertLevel.WARNING), any(Date.class),
-        anyString(), anyString(), isNull());
+        anyString(), eq(Thread.currentThread().getId()), anyString(), isNull());
   }
 
   @Test

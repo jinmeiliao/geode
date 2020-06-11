@@ -132,7 +132,7 @@ public class AlertingServiceDistributedTest implements Serializable {
   public void tearDown() {
     for (VM vm : toArray(managerVM, memberVM)) {
       vm.invoke(() -> {
-        removeListener(messageListener);
+        assertThat(removeListener(messageListener)).isTrue();
         cache.close();
         cache = null;
         logger = null;
@@ -313,7 +313,7 @@ public class AlertingServiceDistributedTest implements Serializable {
   }
 
   @Test
-  public void alertDetailsThreadIdMatchesLoggingThreadId() {
+  public void alertDetailsThreadIdMatchesExecutorThreadId() {
     long threadId = memberVM.invoke(() -> {
       logger.fatal(alertMessage);
       return Thread.currentThread().getId();
@@ -335,7 +335,7 @@ public class AlertingServiceDistributedTest implements Serializable {
 
   private DistributedMember createManager() throws InstanceNotFoundException {
     messageListener = spy(AlertListenerMessage.Listener.class);
-    addListener(messageListener);
+    assertThat(addListener(messageListener)).isTrue();
 
     Properties config = getDistributedSystemProperties();
     config.setProperty(NAME, managerName);

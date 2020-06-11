@@ -18,6 +18,7 @@ import static org.apache.geode.distributed.ConfigurationProperties.LOCATORS;
 import static org.apache.geode.internal.admin.remote.AlertListenerMessage.addListener;
 import static org.apache.geode.internal.admin.remote.AlertListenerMessage.removeListener;
 import static org.apache.geode.internal.alerting.AlertLevel.SEVERE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -60,7 +61,7 @@ public class AlertingServiceWithLonerIntegrationTest {
     alertMessage = "Alerting in " + testName.getMethodName();
 
     messageListener = spy(AlertListenerMessage.Listener.class);
-    addListener(messageListener);
+    assertThat(addListener(messageListener)).isTrue();
 
     Properties config = new Properties();
     config.setProperty(LOCATORS, "");
@@ -74,7 +75,7 @@ public class AlertingServiceWithLonerIntegrationTest {
 
   @After
   public void tearDown() {
-    removeListener(messageListener);
+    assertThat(removeListener(messageListener)).isTrue();
     system.disconnect();
   }
 

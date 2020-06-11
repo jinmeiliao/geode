@@ -33,7 +33,9 @@ import static org.apache.geode.test.dunit.VM.getVM;
 import static org.apache.geode.test.dunit.VM.toArray;
 import static org.apache.geode.test.dunit.internal.DUnitLauncher.getDistributedSystemProperties;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.Serializable;
@@ -47,6 +49,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.mockito.ArgumentCaptor;
 
 import org.apache.geode.cache.CacheFactory;
 import org.apache.geode.distributed.DistributedMember;
@@ -110,7 +113,7 @@ public class AlertingServiceWithoutListenerDistributedTest implements Serializab
   public void tearDown() {
     for (VM vm : toArray(managerVM, memberVM)) {
       vm.invoke(() -> {
-        removeListener(messageListener);
+        assertThat(removeListener(messageListener)).isTrue();
         cache.close();
         cache = null;
         logger = null;
@@ -146,7 +149,13 @@ public class AlertingServiceWithoutListenerDistributedTest implements Serializab
   public void alertMessageIsReceivedByManager() {
     memberVM.invoke(() -> logger.fatal(alertMessage));
 
-    managerVM.invoke(() -> verifyNoMoreInteractions(messageListener));
+    managerVM.invoke(() -> {
+      await().untilAsserted(() -> {
+        ArgumentCaptor<AlertListenerMessage> captor = forClass(AlertListenerMessage.class);
+        verify(messageListener).received(captor.capture());
+        assertThat(captor.getValue().getMessage()).isEqualTo(alertMessage);
+      });
+    });
   }
 
   @Test
@@ -170,7 +179,7 @@ public class AlertingServiceWithoutListenerDistributedTest implements Serializab
 
   private DistributedMember createManager() {
     messageListener = spy(AlertListenerMessage.Listener.class);
-    addListener(messageListener);
+    assertThat(addListener(messageListener)).isTrue();
 
     Properties config = getDistributedSystemProperties();
     config.setProperty(NAME, managerName);

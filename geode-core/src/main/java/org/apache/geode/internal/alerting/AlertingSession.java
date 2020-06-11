@@ -36,6 +36,7 @@ import org.apache.geode.annotations.VisibleForTesting;
 public class AlertingSession {
 
   private final AlertingSessionListeners alertingSessionListeners;
+  private AlertMessaging alertMessaging;
   private State state = State.STOPPED;
 
   public static AlertingSession create() {
@@ -52,6 +53,7 @@ public class AlertingSession {
   }
 
   public synchronized void createSession(final AlertMessaging alertMessaging) {
+    this.alertMessaging = alertMessaging;
     state = state.changeTo(State.CREATED);
     alertingSessionListeners.createSession(alertMessaging);
   }
@@ -67,12 +69,10 @@ public class AlertingSession {
   }
 
   public synchronized void shutdown() {
-    // nothing?
-  }
-
-  @VisibleForTesting
-  AlertingSessionListeners getAlertingSessionListeners() {
-    return alertingSessionListeners;
+    if (alertMessaging != null) {
+      alertMessaging.close();
+      alertMessaging = null;
+    }
   }
 
   synchronized State getState() {
