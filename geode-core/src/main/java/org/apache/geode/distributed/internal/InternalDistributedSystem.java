@@ -1754,6 +1754,11 @@ public class InternalDistributedSystem extends DistributedSystem
     return alertingService;
   }
 
+  @VisibleForTesting
+  public AlertingSession getAlertingSession() {
+    return alertingSession;
+  }
+
   @Override
   public LogConfig getLogConfig() {
     return config;

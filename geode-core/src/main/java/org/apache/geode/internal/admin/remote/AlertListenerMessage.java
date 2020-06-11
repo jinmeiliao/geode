@@ -163,13 +163,13 @@ public class AlertListenerMessage extends PooledDistributionMessage implements A
   }
 
   @VisibleForTesting
-  public static void addListener(Listener listener) {
-    listenerRef.compareAndSet(null, listener);
+  public static boolean addListener(Listener listener) {
+    return listenerRef.compareAndSet(null, listener);
   }
 
   @VisibleForTesting
-  public static void removeListener(Listener listener) {
-    listenerRef.compareAndSet(listener, null);
+  public static boolean removeListener(Listener listener) {
+    return listenerRef.compareAndSet(listener, null);
   }
 
   @VisibleForTesting

@@ -76,6 +76,7 @@ public class AlertAppender extends AbstractAppender
     this(name, layout, filter, AlertingProviderRegistry.get(), START_PAUSED_BY_DEFAULT, false);
   }
 
+  @VisibleForTesting
   protected AlertAppender(final String name,
       final Layout<? extends Serializable> layout,
       final Filter filter,
@@ -185,8 +186,8 @@ public class AlertAppender extends AbstractAppender
       }
 
       LOGGER.trace("Sending alert message for {} to {}.", event, listener.getMember());
-      alertMessaging.sendAlert(listener.getMember(), alertLevel, date, threadName, formattedMessage,
-          stackTrace);
+      alertMessaging.sendAlert(listener.getMember(), alertLevel, date, threadName,
+          Thread.currentThread().getId(), formattedMessage, stackTrace);
     }
   }
 

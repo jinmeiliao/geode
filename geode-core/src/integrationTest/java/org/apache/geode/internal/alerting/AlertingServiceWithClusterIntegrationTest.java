@@ -75,7 +75,7 @@ public class AlertingServiceWithClusterIntegrationTest {
   public TestName testName = new TestName();
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     alertMessage = "Alerting in " + testName.getMethodName();
     exceptionMessage = "Exception in " + testName.getMethodName();
     connectionName = "Member in " + testName.getMethodName();
@@ -83,7 +83,7 @@ public class AlertingServiceWithClusterIntegrationTest {
     threadId = Thread.currentThread().getId();
 
     messageListener = spy(AlertListenerMessage.Listener.class);
-    addListener(messageListener);
+    assertThat(addListener(messageListener)).isTrue();
 
     String startLocator = getServerHostName() + "[" + getRandomAvailableTCPPort() + "]";
 
@@ -100,7 +100,7 @@ public class AlertingServiceWithClusterIntegrationTest {
 
   @After
   public void tearDown() {
-    removeListener(messageListener);
+    assertThat(removeListener(messageListener)).isTrue();
     system.disconnect();
   }
 

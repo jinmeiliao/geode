@@ -113,7 +113,7 @@ public class AlertingServiceWithoutListenerDistributedTest implements Serializab
   public void tearDown() {
     for (VM vm : toArray(managerVM, memberVM)) {
       vm.invoke(() -> {
-        removeListener(messageListener);
+        assertThat(removeListener(messageListener)).isTrue();
         cache.close();
         cache = null;
         logger = null;
@@ -179,7 +179,7 @@ public class AlertingServiceWithoutListenerDistributedTest implements Serializab
 
   private DistributedMember createManager() {
     messageListener = spy(AlertListenerMessage.Listener.class);
-    addListener(messageListener);
+    assertThat(addListener(messageListener)).isTrue();
 
     Properties config = getDistributedSystemProperties();
     config.setProperty(NAME, managerName);

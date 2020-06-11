@@ -29,11 +29,12 @@ class AlertListenerMessageFactory {
       final Date date,
       final String connectionName,
       final String threadName,
+      final long threadId,
       final String formattedMessage,
       final String stackTrace) {
     verifyDistributedMemberCanReceiveMessage(member);
-    return create(member, alertLevel.intLevel(), date, connectionName, threadName,
-        Thread.currentThread().getId(), formattedMessage, stackTrace);
+    return create(member, alertLevel.intLevel(), date, connectionName, threadName, threadId,
+        formattedMessage, stackTrace);
   }
 
   /**

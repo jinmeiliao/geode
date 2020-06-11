@@ -86,7 +86,7 @@ public class AlertAppenderIntegrationTest {
   public TestName testName = new TestName();
 
   @BeforeClass
-  public static void setUpLogConfigFile() throws Exception {
+  public static void setUpLogConfigFile() {
     URL resource = getResource(CONFIG_FILE_NAME);
     configFilePath = createFileFromResource(resource, temporaryFolder.getRoot(), CONFIG_FILE_NAME)
         .getAbsolutePath();
@@ -244,7 +244,7 @@ public class AlertAppenderIntegrationTest {
 
     assertThat(alertAppender.getLogEvents()).hasSize(1);
     verify(alertMessaging).sendAlert(eq(localMember), eq(AlertLevel.WARNING), any(Date.class),
-        anyString(), anyString(), isNull());
+        anyString(), eq(Thread.currentThread().getId()), anyString(), isNull());
   }
 
   @Test
