@@ -43,7 +43,7 @@ resources:
 - name: geode-ci
   type: git
   source:
-    branch: develop
+    branch: support/9.9
     depth: 1
     paths:
     - ci/pipelines/geode-build/*
