@@ -102,25 +102,18 @@ public class RebalanceCommandDistributedTestBase {
 
   /**
    * See GEODE-8071.
-   * The test asserts that the amount of non-daemon threads on the locator VM remains constant
-   * before and after executing the re-balance command.
+   * The test simply asserts that the re-balance command doesn't launch a non daemon thread
+   * during its execution.
    */
   @Test
   public void rebalanceCommandShouldNotLaunchNonDaemonThreads() {
-    long nonDaemonThreadsBeforeCommand = locator.invoke(() -> Thread.getAllStackTraces()
-        .keySet()
-        .stream()
-        .filter(thread -> !thread.isDaemon())
-        .count());
-
     gfsh.executeAndAssertThat("rebalance").statusIsSuccess();
 
-    long daemonThreadsAfterCommand = locator.invoke(() -> Thread.getAllStackTraces()
-        .keySet()
-        .stream()
-        .filter(thread -> !thread.isDaemon())
-        .count());
-
-    assertThat(daemonThreadsAfterCommand).isEqualTo(nonDaemonThreadsBeforeCommand);
+    locator.invoke(() -> {
+      assertThat(Thread.getAllStackTraces().keySet().stream()
+          .anyMatch(thread -> !thread.isDaemon() && thread.getName().contains("RebalanceCommand")))
+              .as("Rebalance Command should not launch non daemon threads")
+              .isFalse();
+    });
   }
 }
