@@ -114,19 +114,32 @@ public class GfshRule extends ExternalResource {
     return execute(GfshScript.of(commands));
   }
 
-  public GfshExecution execute(GfshScript gfshScript) {
+  /**
+   * this will allow you to specify a gfsh workingDir when executing the script
+   * this is usually helpful if you would start a different gfsh session but would
+   * like to remain in the same working dir as your previous one.
+   *
+   * You can get your gfsh session's working dir by using GfshExecution.getWorkingDir
+   */
+  public GfshExecution execute(GfshScript gfshScript, File workingDir) {
     System.out.println("Executing " + gfshScript);
     try {
-      File workingDir = new File(temporaryFolder.getRoot(), gfshScript.getName());
-      workingDir.mkdirs();
-
       int debugPort = gfshScript.getDebugPort();
       Process process = toProcessBuilder(gfshScript, gfsh, workingDir, debugPort).start();
-
       GfshExecution gfshExecution = new GfshExecution(process, workingDir);
       gfshExecutions.add(gfshExecution);
       gfshExecution.awaitTermination(gfshScript);
       return gfshExecution;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public GfshExecution execute(GfshScript gfshScript) {
+    try {
+      File workingDir = new File(temporaryFolder.getRoot(), gfshScript.getName());
+      workingDir.mkdirs();
+      return execute(gfshScript, workingDir);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -198,5 +211,24 @@ public class GfshRule extends ExternalResource {
       return;
     }
     execute(GfshScript.of(stopMemberScripts).withName("Stop-Members"));
+  }
+
+  public static String startServerCommand(String name, int port, int connectedLocatorPort) {
+    String command = "start server --name=" + name
+        + " --server-port=" + port
+        + " --locators=localhost[" + connectedLocatorPort + "]";
+    return command;
+  }
+
+  public static String startLocatorCommand(String name, int port, int jmxPort, int httpPort,
+      int connectedLocatorPort) {
+    String command = "start locator --name=" + name
+        + " --port=" + port
+        + " --http-service-port=" + httpPort;
+    if (connectedLocatorPort > 0) {
+      command += " --locators=localhost[" + connectedLocatorPort + "]";
+    }
+    command += " --J=-Dgemfire.jmx-manager-port=" + jmxPort;
+    return command;
   }
 }
