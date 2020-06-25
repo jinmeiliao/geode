@@ -70,7 +70,8 @@ public class OperationManagementUpgradeTest {
   @Parameterized.Parameters(name = "{0}")
   public static Collection<String> data() {
     List<String> result = VersionManager.getInstance().getVersionsWithoutCurrent();
-    result.removeIf(s -> TestVersion.compare(s, "1.12.0") < 0);
+    result.stream().forEach(System.out::println);
+    result.removeIf(s -> TestVersion.compare(s, "1.13.0") < 0);
     return result;
   }
 
