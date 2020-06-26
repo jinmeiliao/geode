@@ -32,9 +32,10 @@ public class TestVersion implements Comparable, Serializable {
 
   public TestVersion(String versionString) {
     String[] split = versionString.split("\\.");
-//    if (split.length != 3) {
-//      throw new IllegalArgumentException("Expected a version string but received " + versionString);
-//    }
+    // if (split.length != 3) {
+    // throw new IllegalArgumentException("Expected a version string but received " +
+    // versionString);
+    // }
     major = Integer.parseInt(split[0]);
     minor = Integer.parseInt(split[1]);
     if (split[2].contains("-incubating")) {

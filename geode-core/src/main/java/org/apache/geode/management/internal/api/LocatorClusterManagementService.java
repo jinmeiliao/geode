@@ -532,14 +532,19 @@ public class LocatorClusterManagementService implements ClusterManagementService
       OperationState<A, V> operationState) {
     StatusCode resultStatus = StatusCode.OK;
     String resultMessage = "";
-    if (operationState.getOperationEnd() == null
-        && cache.getMyId().toString().compareTo(operationState.getLocator()) != 0
-        && (!cache.getDistributedSystem().getAllOtherMembers().stream().map(Object::toString)
-            .collect(Collectors.toSet()).contains(operationState.getLocator()))) {
-      resultStatus = StatusCode.ENTITY_NOT_FOUND;
-      resultMessage = "Locator that initiated the Rest API rebalance operation is offline.";
-    } else if (operationState.getOperationEnd() == null) {
+    // if (operationState.getOperationEnd() == null
+    // && cache.getMyId().toString().compareTo(operationState.getLocator()) != 0
+    // && (!cache.getDistributedSystem().getAllOtherMembers().stream().map(Object::toString)
+    // .collect(Collectors.toSet()).contains(operationState.getLocator()))) {
+    // resultStatus = StatusCode.ENTITY_NOT_FOUND;
+    // resultMessage = "Locator that initiated the Rest API rebalance operation is offline.";
+    // } else
+    if (operationState.getOperationEnd() == null) {
+      // if (cache.getInternalResourceManager().getRebalanceOperations().isEmpty()) {
+      // resultStatus = S
+      // } else {
       resultStatus = StatusCode.IN_PROGRESS;
+      // }
     } else if (operationState.getThrowable() != null) {
       resultStatus = StatusCode.ERROR;
       resultMessage = operationState.getThrowable().toString();
