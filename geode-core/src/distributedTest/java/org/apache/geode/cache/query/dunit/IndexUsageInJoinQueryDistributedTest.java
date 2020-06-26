@@ -160,7 +160,7 @@ public class IndexUsageInJoinQueryDistributedTest implements Serializable {
     DistributionStats distributionStats =
         (DistributionStats) ((InternalDistributedSystem) ClusterStartupRule.getCache()
             .getDistributedSystem()).getDistributionManager().getStats();
-    return distributionStats.getStats().getLong("deserializations");
+    return distributionStats.getStats().getInt("deserializations");
   }
 
   public static class Product implements PdxSerializable {
