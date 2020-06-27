@@ -21,6 +21,8 @@ import static org.apache.geode.test.awaitility.GeodeAwaitility.await;
 import static org.apache.geode.test.util.ResourceUtils.createFileFromResource;
 import static org.apache.geode.test.util.ResourceUtils.getResource;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.Before;
@@ -49,6 +51,7 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
   private Path pulseLogFile;
   private Path customLogFile;
   private TemporaryFolder temporaryFolder;
+  private File gfshWorkingDir;
 
   @Rule
   public GfshRule gfshRule = new GfshRule();
@@ -71,12 +74,12 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
   }
 
   @Before
-  public void setUpOutputFiles() {
+  public void setUpOutputFiles() throws IOException {
     temporaryFolder = gfshRule.getTemporaryFolder();
-
+    gfshWorkingDir = temporaryFolder.getRoot();
     locatorName = testName.getMethodName();
 
-    workingDir = temporaryFolder.getRoot().toPath().toAbsolutePath();
+    workingDir = temporaryFolder.newFolder(locatorName).toPath();
     locatorLogFile = workingDir.resolve(locatorName + ".log");
     pulseLogFile = workingDir.resolve("pulse.log");
     customLogFile = workingDir.resolve("custom.log");
@@ -96,14 +99,13 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
     String startLocatorCommand = String.join(" ",
         "start locator",
         "--name=" + locatorName,
-        "--dir=" + workingDir,
         "--port=" + locatorPort,
         "--J=-Dgemfire.jmx-manager=true",
         "--J=-Dgemfire.jmx-manager-start=true",
         "--J=-Dgemfire.jmx-manager-http-port=" + httpPort,
         "--J=-Dgemfire.jmx-manager-port=" + rmiPort);
 
-    gfshRule.execute(startLocatorCommand);
+    gfshRule.execute(gfshWorkingDir, startLocatorCommand);
 
     await().untilAsserted(() -> {
       assertThat(locatorLogFile.toFile())
@@ -130,7 +132,6 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
     String startLocatorCommand = String.join(" ",
         "start locator",
         "--name=" + locatorName,
-        "--dir=" + workingDir,
         "--port=" + locatorPort,
         "--J=-Dgemfire.jmx-manager=true",
         "--J=-Dgemfire.jmx-manager-start=true",
@@ -138,7 +139,7 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
         "--J=-Dgemfire.jmx-manager-port=" + rmiPort,
         "--J=-Dlog4j.configurationFile=" + configWithoutGeodePluginsFile.toAbsolutePath());
 
-    gfshRule.execute(startLocatorCommand);
+    gfshRule.execute(gfshWorkingDir, startLocatorCommand);
 
     await().untilAsserted(() -> {
       assertThat(locatorLogFile.toFile())
@@ -169,7 +170,6 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
     String startLocatorCommand = String.join(" ",
         "start locator",
         "--name=" + locatorName,
-        "--dir=" + workingDir,
         "--port=" + locatorPort,
         "--classpath", classpath,
         "--J=-Dgemfire.jmx-manager=true",
@@ -177,7 +177,7 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
         "--J=-Dgemfire.jmx-manager-http-port=" + httpPort,
         "--J=-Dgemfire.jmx-manager-port=" + rmiPort);
 
-    gfshRule.execute(startLocatorCommand);
+    gfshRule.execute(gfshWorkingDir, startLocatorCommand);
 
     await().untilAsserted(() -> {
       assertThat(locatorLogFile.toFile())
@@ -204,7 +204,6 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
     String startLocatorCommand = String.join(" ",
         "start locator",
         "--name=" + locatorName,
-        "--dir=" + workingDir,
         "--port=" + locatorPort,
         "--J=-Dgemfire.jmx-manager=true",
         "--J=-Dgemfire.jmx-manager-start=true",
@@ -212,7 +211,7 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
         "--J=-Dgemfire.jmx-manager-port=" + rmiPort,
         "--J=-Dlog4j.configurationFile=" + configWithGeodePluginsFile.toAbsolutePath());
 
-    gfshRule.execute(startLocatorCommand);
+    gfshRule.execute(gfshWorkingDir, startLocatorCommand);
 
     await().untilAsserted(() -> {
       assertThat(locatorLogFile.toFile())
@@ -248,7 +247,6 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
     String startLocatorCommand = String.join(" ",
         "start locator",
         "--name=" + locatorName,
-        "--dir=" + workingDir,
         "--port=" + locatorPort,
         "--classpath", classpath,
         "--J=-Dgemfire.jmx-manager=true",
@@ -256,7 +254,7 @@ public class LocatorWithCustomLogConfigAcceptanceTest {
         "--J=-Dgemfire.jmx-manager-http-port=" + httpPort,
         "--J=-Dgemfire.jmx-manager-port=" + rmiPort);
 
-    gfshRule.execute(startLocatorCommand);
+    gfshRule.execute(gfshWorkingDir, startLocatorCommand);
 
     await().untilAsserted(() -> {
       assertThat(locatorLogFile.toFile())
