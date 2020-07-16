@@ -161,18 +161,21 @@ public class ConnectCommand extends OfflineGfshCommand {
       return result;
     }
 
-    String gfshVersion = gfsh.getVersion();
     String remoteVersion = null;
+    String gfshVersion = gfsh.getVersion();
     try {
       remoteVersion = invoker.getRemoteVersion();
-      if (versionComponent(remoteVersion, VERSION_MAJOR)
-          .equalsIgnoreCase(versionComponent(gfshVersion, VERSION_MAJOR))
-          && versionComponent(remoteVersion, VERSION_MINOR)
-              .equalsIgnoreCase(versionComponent(gfshVersion, VERSION_MINOR))) {
+      int minorVersion = Integer.parseInt(versionComponent(remoteVersion, VERSION_MINOR));
+      if (versionComponent(remoteVersion, VERSION_MAJOR).equals("1") && minorVersion >= 10 ||
+          versionComponent(remoteVersion, VERSION_MAJOR).equals("9") && minorVersion >= 9) {
+        InfoResultModel versionInfo = result.addInfo("versionInfo");
+        versionInfo.addLine("You are connected to a cluster of version: " + remoteVersion);
         return result;
       }
-    } catch (Exception e) {
-      gfsh.logInfo("failed to get the the remote version.", e);
+    } catch (Exception ex) {
+      // if unable to get the remote version, we are certainly talking to
+      // a pre-1.5 cluster
+      gfsh.logInfo("failed to get the the remote version.", ex);
     }
 
     // will reach here only when remoteVersion is not available or does not match
@@ -186,7 +189,7 @@ public class ConnectCommand extends OfflineGfshCommand {
     }
   }
 
-  private String versionComponent(String version, int component) {
+  private static String versionComponent(String version, int component) {
     String[] versionComponents = StringUtils.split(version, '.');
     return versionComponents.length >= component + 1 ? versionComponents[component] : "";
   }

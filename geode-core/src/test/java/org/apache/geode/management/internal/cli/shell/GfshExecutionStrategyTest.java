@@ -119,6 +119,20 @@ public class GfshExecutionStrategyTest {
     Mockito.verify(parsedCommand, times(1)).setUserInput(AFTER_INTERCEPTION_MESSAGE);
   }
 
+  @Test
+  public void testOnLineCommandWhenGfshReceivesInvalidJson() throws Exception {
+    when(parsedCommand.getMethod()).thenReturn(Commands.class.getDeclaredMethod("onlineCommand"));
+    when(parsedCommand.getInstance()).thenReturn(new Commands());
+    when(gfsh.isConnectedAndReady()).thenReturn(true);
+    OperationInvoker invoker = mock(OperationInvoker.class);
+
+    when(invoker.processCommand(any(CommandRequest.class))).thenReturn("invalid-json");
+    when(gfsh.getOperationInvoker()).thenReturn(invoker);
+    Result result = (Result) gfshExecutionStrategy.execute(parsedCommand);
+    assertThat(result.getStatus()).isEqualTo(Result.Status.ERROR);
+    assertThat(result.nextLine().trim()).contains("Unable to parse the remote response.");
+  }
+
   /**
    * represents class for dummy methods
    */
