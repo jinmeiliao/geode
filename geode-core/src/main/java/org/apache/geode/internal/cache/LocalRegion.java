@@ -8189,7 +8189,10 @@ public class LocalRegion extends AbstractRegion implements LoaderHelperFactory,
     if (this.entryExpiryTasks.isEmpty())
       return;
     boolean doPurge = false;
-    for (EntryExpiryTask task : this.entryExpiryTasks.values()) {
+    Iterator<EntryExpiryTask> iterator = entryExpiryTasks.values().iterator();
+    while (iterator.hasNext()) {
+      EntryExpiryTask task = iterator.next();
+      iterator.remove();
       // no need to call incCancels since we will call forcePurge
       task.cancel();
       doPurge = true;
