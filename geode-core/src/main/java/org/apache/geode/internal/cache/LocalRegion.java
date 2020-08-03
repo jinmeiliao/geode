@@ -7919,7 +7919,10 @@ public class LocalRegion extends AbstractRegion implements LoaderHelperFactory,
       return;
     }
     boolean doPurge = false;
-    for (EntryExpiryTask task : entryExpiryTasks.values()) {
+    Iterator<EntryExpiryTask> iterator = entryExpiryTasks.values().iterator();
+    while (iterator.hasNext()) {
+      EntryExpiryTask task = iterator.next();
+      iterator.remove();
       // no need to call incCancels since we will call forcePurge
       task.cancel();
       doPurge = true;
@@ -11247,4 +11250,10 @@ public class LocalRegion extends AbstractRegion implements LoaderHelperFactory,
       }
     }
   }
+
+  @VisibleForTesting
+  ConcurrentHashMap<RegionEntry, EntryExpiryTask> getEntryExpiryTasks() {
+    return entryExpiryTasks;
+  }
+
 }
