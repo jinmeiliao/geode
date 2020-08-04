@@ -234,8 +234,8 @@ Apache Geode bundles the following files under the BSD 3-Clause License:
   - scala-library v2.10.7 (http://www.scala-lang.org), Copyright (c)
     2002-2016 EPFL, Copyright (c) 2011-2016 Lightbend, Inc. (formerly
     Typesafe, Inc.)
- -  Snappy v0.4 (https://github.com/google/snappy), Copyright (c) 2011,
-    Google Inc.
+ -  Snappy v0.4 (http://github.com/dain/snappy), Copyright (c) 2011,
+    Dain Sundstrom, Copyright (c) 2011, Google Inc.
 
 All rights reserved.
 Redistribution and use in source and binary forms, with or without
