@@ -20,8 +20,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,15 +118,17 @@ public class QueryResultFormatterTest {
     QueryResultFormatter stringResult = new QueryResultFormatter(100).add(RESULT, "String");
     checkResult(stringResult, "{\"result\":[[\"java.lang.String\",\"String\"]]}");
 
-    QueryResultFormatter javaDateResult =
-        new QueryResultFormatter(100).add(RESULT, new java.util.Date(0));
+    Date date = new Date(0);
+    String expectedString =
+        new SimpleDateFormat(QueryResultFormatter.DATE_FORMAT_PATTERN).format(date);
+    QueryResultFormatter javaDateResult = new QueryResultFormatter(100).add(RESULT, date);
     checkResult(javaDateResult,
-        "{\"result\":[[\"java.util.Date\",\"1970-01-01T00:00:00.000+0000\"]]}");
+        "{\"result\":[[\"java.util.Date\",\"" + expectedString + "\"]]}");
 
-    QueryResultFormatter sqlDateResult =
-        new QueryResultFormatter(100).add(RESULT, new java.sql.Date(0));
+    java.sql.Date sqlDate = new java.sql.Date(0);
+    QueryResultFormatter sqlDateResult = new QueryResultFormatter(100).add(RESULT, sqlDate);
     checkResult(sqlDateResult,
-        "{\"result\":[[\"java.sql.Date\",\"1970-01-01T00:00:00.000+0000\"]]}");
+        "{\"result\":[[\"java.sql.Date\",\"" + expectedString + "\"]]}");
   }
 
   @Test
