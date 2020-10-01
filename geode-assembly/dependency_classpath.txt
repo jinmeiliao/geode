@@ -37,7 +37,7 @@ jetty-webapp-9.4.12.v20180830.jar
 jetty-servlet-9.4.12.v20180830.jar
 jetty-security-9.4.12.v20180830.jar
 jetty-server-9.4.12.v20180830.jar
-spring-core-4.3.20.RELEASE.jar
+spring-core-4.3.29.RELEASE.jar
 snappy-0.4.jar
 shiro-core-1.4.0.jar
 classgraph-4.0.6.jar
