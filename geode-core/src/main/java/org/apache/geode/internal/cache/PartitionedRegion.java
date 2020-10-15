@@ -6274,6 +6274,7 @@ public class PartitionedRegion extends LocalRegion
 
   @Override
   public boolean containsKey(Object key) {
+    System.clearProperty("jinmei-createBucketAtomically");
     checkReadiness();
     validateKey(key);
     return getDataView().containsKey(getKeyInfo(key), this);

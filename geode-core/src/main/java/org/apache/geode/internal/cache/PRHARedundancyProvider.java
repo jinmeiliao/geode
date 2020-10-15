@@ -556,7 +556,7 @@ public class PRHARedundancyProvider {
       InternalDistributedMember bucketPrimary = null;
       try {
         this.prRegion.checkReadiness();
-
+        System.setProperty("jinmei-createBucketAtomically", "0");
         Bucket toCreate = this.prRegion.getRegionAdvisor().getBucket(bucketId);
 
         if (!finishIncompleteCreation) {
@@ -577,6 +577,7 @@ public class PRHARedundancyProvider {
         // detected
         for (;;) {
           this.prRegion.checkReadiness();
+          System.setProperty("jinmei-createBucketAtomically", "1");
           if (this.prRegion.getCache().isCacheAtShutdownAll()) {
             if (isDebugEnabled) {
               logger.debug("Aborted createBucketAtomically due to ShutdownAll");
@@ -624,6 +625,7 @@ public class PRHARedundancyProvider {
             }
           }
 
+          System.setProperty("jinmei-createBucketAtomically", "2");
           // Get an updated list of bucket owners, which should include
           // buckets created concurrently with this createBucketAtomically call
           acceptedMembers = prRegion.getRegionAdvisor().getBucketOwners(bucketId);
@@ -640,7 +642,7 @@ public class PRHARedundancyProvider {
 
           // prune out the stores that have left
           verifyBucketNodes(excludedMembers, partitionName);
-
+          System.setProperty("jinmei-createBucketAtomically", "3");
           // Note - we used to wait for the created bucket to become primary here
           // if this is a colocated region. We no longer need to do that, because
           // the EndBucketMessage is sent out after bucket creation completes to
@@ -667,6 +669,8 @@ public class PRHARedundancyProvider {
                 bucketNotCreated);
           }
 
+          System.setProperty("jinmei-createBucketAtomically", "4");
+
           if (bucketNotCreated) {
             // if we haven't managed to create the bucket on any nodes, retry.
             continue;
@@ -676,13 +680,17 @@ public class PRHARedundancyProvider {
             insufficientStores(allStores, acceptedMembers, true);
           }
 
+          System.setProperty("jinmei-createBucketAtomically", "5");
           // Allow the thread to potentially finish bucket creation even if redundancy was not met.
           // Fix for bug 39283
           if (redundancySatisfied || exhaustedPotentialCandidates) {
             // Tell one of the members to become primary.
             // The rest of the members will be allowed to
             // volunteer for primary.
+
+            System.setProperty("jinmei-createBucketAtomically", "6");
             endBucketCreation(bucketId, acceptedMembers, bucketPrimary, partitionName);
+            System.setProperty("jinmei-endBucketCreation", "7");
 
             final int expectedRemoteHosts = acceptedMembers.size()
                 - (acceptedMembers.contains(this.prRegion.getMyId()) ? 1 : 0);
