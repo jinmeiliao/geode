@@ -568,6 +568,11 @@ public class PRHARedundancyProvider {
         logger.debug("Starting atomic creation of bucketId={}",
             partitionedRegion.bucketStringForLogs(bucketId));
       }
+      Collection<InternalDistributedMember> acceptedMembers =
+          new ArrayList<InternalDistributedMember>(); // ArrayList<DataBucketStores>
+      Set<InternalDistributedMember> excludedMembers = new HashSet<InternalDistributedMember>();
+      ArrayListWithClearState<InternalDistributedMember> failedMembers =
+          new ArrayListWithClearState<InternalDistributedMember>();
 
       long timeOut = System.currentTimeMillis() + computeTimeout();
       BucketMembershipObserver observer = null;
@@ -593,12 +598,8 @@ public class PRHARedundancyProvider {
         }
 
         observer = new BucketMembershipObserver(toCreate).beginMonitoring();
-        ArrayListWithClearState<InternalDistributedMember> failedMembers =
-            new ArrayListWithClearState<>();
-        Set<InternalDistributedMember> excludedMembers = new HashSet<>();
-        Collection<InternalDistributedMember> acceptedMembers = new ArrayList<>();
-
-        for (boolean loggedInsufficientStores = false;;) {
+        boolean loggedInsufficentStores = false;
+        for (;;) {
           partitionedRegion.checkReadiness();
           if (partitionedRegion.getCache().isCacheAtShutdownAll()) {
             if (isDebugEnabled) {
@@ -621,7 +622,7 @@ public class PRHARedundancyProvider {
           // Always go back to the advisor, see if any fresh data stores are present.
           Set<InternalDistributedMember> allStores = getAllStores(partitionName);
 
-          loggedInsufficientStores = checkSufficientStores(allStores, loggedInsufficientStores);
+          loggedInsufficentStores = checkSufficientStores(allStores, loggedInsufficentStores);
 
           InternalDistributedMember candidate = createBucketInstance(bucketId, newBucketSize,
               excludedMembers, acceptedMembers, failedMembers, timeOut, allStores);
@@ -676,7 +677,7 @@ public class PRHARedundancyProvider {
               failedMembers.wasCleared() && potentialCandidateCount <= 0;
           boolean redundancySatisfied =
               acceptedMembers.size() > partitionedRegion.getRedundantCopies();
-          boolean bucketNotCreated = acceptedMembers.isEmpty();
+          boolean bucketNotCreated = acceptedMembers.size() == 0;
 
           if (isDebugEnabled) {
             logger.debug(
