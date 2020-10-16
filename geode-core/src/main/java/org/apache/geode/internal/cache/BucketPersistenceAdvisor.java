@@ -14,6 +14,8 @@
  */
 package org.apache.geode.internal.cache;
 
+import static org.apache.geode.internal.cache.PRHARedundancyProvider.jinmei_debug;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -444,6 +446,7 @@ public class BucketPersistenceAdvisor extends PersistenceAdvisorImpl {
    * proxy bucket synchronized.
    */
   public void endBucketCreation(PersistentMemberID newId) {
+    jinmei_debug.set(4);
     synchronized (lock) {
       if (!atomicCreation) {
         if (logger.isDebugEnabled(LogMarker.PERSIST_ADVISOR_VERBOSE)) {

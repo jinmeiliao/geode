@@ -14,6 +14,8 @@
  */
 package org.apache.geode.internal.cache.persistence;
 
+import static org.apache.geode.internal.cache.PRHARedundancyProvider.jinmei_debug;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -375,7 +377,7 @@ public class PersistenceAdvisorImpl implements InternalPersistenceAdvisor {
             shortDiskStoreId(), regionPath, persistentMemberView.getOnlineMembers(),
             persistentMemberView.getOfflineMembers(), equalMembers);
       }
-
+      jinmei_debug.set(5);
       persistentMemberView.setInitialized();
       online = true;
       removedMembers.clear();

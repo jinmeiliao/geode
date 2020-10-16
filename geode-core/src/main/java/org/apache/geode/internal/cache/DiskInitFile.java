@@ -14,6 +14,8 @@
  */
 package org.apache.geode.internal.cache;
 
+import static org.apache.geode.internal.cache.PRHARedundancyProvider.jinmei_debug;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
@@ -940,6 +942,7 @@ public class DiskInitFile implements DiskInitFileInterpreter {
   static final int DR_ID_MAX_BYTES = 9;
 
   private void writeIFRecord(byte b, DiskRegionView dr) {
+    jinmei_debug.set(7);
     assert lock.isHeldByCurrentThread();
     try {
       ByteBuffer bb = getIFWriteBuffer(1 + DR_ID_MAX_BYTES + 1);
@@ -1395,6 +1398,7 @@ public class DiskInitFile implements DiskInitFileInterpreter {
     if (this.closed) {
       throw new DiskAccessException("The disk store is closed", parent);
     }
+    logger.info("Jinmei: In writeIFRecord, after closed check.");
 
     this.ifRAF.write(bb.array(), 0, bb.position());
     if (logger.isTraceEnabled(LogMarker.PERSIST_WRITES_VERBOSE)) {
@@ -2266,6 +2270,7 @@ public class DiskInitFile implements DiskInitFileInterpreter {
   }
 
   void markInitialized(DiskRegionView dr) {
+    jinmei_debug.set(6);
     lock(true);
     try {
       if (regionStillCreated(dr)) {
