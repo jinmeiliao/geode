@@ -32,6 +32,7 @@ import org.apache.geode.internal.cache.versions.RegionVersionVector;
 import org.apache.geode.internal.cache.versions.VersionTag;
 import org.apache.geode.internal.serialization.DeserializationContext;
 import org.apache.geode.internal.serialization.SerializationContext;
+import org.apache.geode.logging.internal.log4j.api.LogService;
 
 public class DistributedClearOperation extends DistributedCacheOperation {
   public static enum OperationType {
@@ -77,6 +78,7 @@ public class DistributedClearOperation extends DistributedCacheOperation {
    */
   public static void lockAndFlushToOthers(RegionEventImpl regionEvent,
       Set<InternalDistributedMember> recipients) {
+    LogService.getLogger().info("Jinmei: lockAndFlushToOthers");
     DistributedClearOperation dco = new DistributedClearOperation(
         DistributedClearOperation.OperationType.OP_LOCK_FOR_CLEAR, regionEvent, null, recipients);
     dco.distribute();
@@ -212,6 +214,8 @@ public class DistributedClearOperation extends DistributedCacheOperation {
         throws EntryNotFoundException {
 
       LocalRegion region = (LocalRegion) event.getRegion();
+      LogService.getLogger()
+          .info("Jinmei: DistributedClearOperation.operateOnRegion " + this.clearOp);
       switch (this.clearOp) {
         case OP_CLEAR:
           region.clearRegionLocally((RegionEventImpl) event, false, this.rvv);

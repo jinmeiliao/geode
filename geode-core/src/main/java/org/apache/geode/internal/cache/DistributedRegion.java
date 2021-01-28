@@ -2088,6 +2088,7 @@ public class DistributedRegion extends LocalRegion implements InternalDistribute
    */
   protected void obtainWriteLocksForClear(RegionEventImpl regionEvent,
       Set<InternalDistributedMember> participants) {
+    logger.info("Jinmei: DistributedRegion.obtainWriteLocksForClear");
     lockLocallyForClear(getDistributionManager(), getMyId(), regionEvent);
     lockAndFlushClearToOthers(regionEvent, participants);
   }
@@ -2103,7 +2104,9 @@ public class DistributedRegion extends LocalRegion implements InternalDistribute
    */
   void lockLocallyForClear(DistributionManager dm, InternalDistributedMember locker,
       CacheEvent event) {
+    logger.info("Jinmei: DistributedRegion.lockLocallyForClear " + getName());
     RegionVersionVector rvv = getVersionVector();
+
 
     ARMLockTestHook armLockTestHook = getRegionMap().getARMLockTestHook();
     if (armLockTestHook != null) {

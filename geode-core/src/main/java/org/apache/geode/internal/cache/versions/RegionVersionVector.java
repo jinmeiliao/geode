@@ -333,6 +333,7 @@ public abstract class RegionVersionVector<T extends VersionSource<?>>
    */
   private void lockVersionGeneration(final String regionPath, final DistributionManager dm,
       final InternalDistributedMember locker) {
+    logger.info("Jinmei: RegionVersionVector.lockVersionGeneration " + regionPath);
     final CountDownLatch acquiredLock = new CountDownLatch(1);
     if (logger.isDebugEnabled()) {
       logger.debug("Locking version generation for {} region {} RVV {}", locker, regionPath,
@@ -458,6 +459,7 @@ public abstract class RegionVersionVector<T extends VersionSource<?>>
 
   /** obtain a lock to prevent concurrent clear() from happening */
   public void lockForCacheModification(LocalRegion owner) {
+    logger.info("Jinmei: RegionVersionVector.lockForCacheModification lock read" + owner.getName());
     if (owner.getServerProxy() == null) {
       this.versionLock.readLock().lock();
     }

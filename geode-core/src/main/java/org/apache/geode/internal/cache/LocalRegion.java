@@ -8475,6 +8475,7 @@ public class LocalRegion extends AbstractRegion implements LoaderHelperFactory,
       RegionVersionVector vector) {
     final boolean isRvvDebugEnabled = logger.isTraceEnabled(LogMarker.RVV_VERBOSE);
 
+    logger.info("Jinmei: LocalRegion.clearRegionLocally " + getName());
     RegionVersionVector rvv = vector;
     if (serverRegionProxy != null) {
       // clients and local regions do not maintain a full RVV. can't use it with clear()

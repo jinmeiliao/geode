@@ -275,6 +275,7 @@ public class IndexManager {
     }
 
     try {
+      logger.info("Jinmei: IndexManager.createIndex lockRVVForBulkOp " + this.region.getName());
       ((LocalRegion) this.region).lockRVVForBulkOp();
 
       String projectionAttributes = "*"; // for now this is the only option

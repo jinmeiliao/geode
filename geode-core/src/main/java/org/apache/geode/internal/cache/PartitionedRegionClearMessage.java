@@ -109,6 +109,8 @@ public class PartitionedRegionClearMessage extends PartitionMessage {
       return true;
     }
 
+    LogService.getLogger()
+        .info("Jinmei: PartitionedRegionClearMessage.operateOnPartitionedRegion " + op);
     if (op == OperationType.OP_LOCK_FOR_PR_CLEAR) {
       partitionedRegion.getPartitionedRegionClear().obtainClearLockLocal(getSender());
     } else if (op == OperationType.OP_UNLOCK_FOR_PR_CLEAR) {

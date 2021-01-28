@@ -86,22 +86,37 @@ public class PartitionedRegionClear {
     return partitionedRegionClearListener;
   }
 
+  /**
+   * only called if there are any listeners or clients interested.
+   */
   void obtainLockForClear(RegionEventImpl event) {
     obtainClearLockLocal(partitionedRegion.getDistributionManager().getId());
     sendPartitionedRegionClearMessage(event,
         PartitionedRegionClearMessage.OperationType.OP_LOCK_FOR_PR_CLEAR);
   }
 
+  /**
+   * only called if there are any listeners or clients interested.
+   */
   void releaseLockForClear(RegionEventImpl event) {
     releaseClearLockLocal();
     sendPartitionedRegionClearMessage(event,
         PartitionedRegionClearMessage.OperationType.OP_UNLOCK_FOR_PR_CLEAR);
   }
 
+  /**
+   * clears local primaries and send message to remote primaries to clear
+   */
   Set<Integer> clearRegion(RegionEventImpl regionEvent) {
-    Set<Integer> allBucketsCleared = new HashSet<>(clearRegionLocal(regionEvent));
-    allBucketsCleared.addAll(sendPartitionedRegionClearMessage(regionEvent,
-        PartitionedRegionClearMessage.OperationType.OP_PR_CLEAR));
+    // this includes all local primary buckets and their remote secondaries
+    Set<Integer> localPrimaryBuckets = clearRegionLocal(regionEvent);
+    // this includes all remote primary buckets and their secondaries
+    Set<Integer> remotePrimaryBuckets = sendPartitionedRegionClearMessage(regionEvent,
+        PartitionedRegionClearMessage.OperationType.OP_PR_CLEAR);
+
+    Set<Integer> allBucketsCleared = new HashSet<>();
+    allBucketsCleared.addAll(localPrimaryBuckets);
+    allBucketsCleared.addAll(remotePrimaryBuckets);
     return allBucketsCleared;
   }
 
@@ -124,6 +139,10 @@ public class PartitionedRegionClear {
     } while (retry);
   }
 
+  /**
+   * this clears all local primary buckets (each will distribute the clear operation to its
+   * secondary members) and all of their remote secondaries
+   */
   public Set<Integer> clearRegionLocal(RegionEventImpl regionEvent) {
     Set<Integer> clearedBuckets = new HashSet<>();
     long clearStartTime = System.nanoTime();
@@ -210,6 +229,7 @@ public class PartitionedRegionClear {
   }
 
   protected void obtainClearLockLocal(InternalDistributedMember requester) {
+    logger.info("Jinmei: inside PartitionedRegionClear.obtainClearLockLocal ");
     synchronized (lockForListenerAndClientNotification) {
       // Check if the member is still part of the distributed system
       if (!partitionedRegion.getDistributionManager().isCurrentMember(requester)) {
@@ -219,8 +239,10 @@ public class PartitionedRegionClear {
       lockForListenerAndClientNotification.setLocked(requester);
       if (partitionedRegion.getDataStore() != null) {
         for (BucketRegion localPrimaryBucketRegion : partitionedRegion.getDataStore()
-            .getAllLocalPrimaryBucketRegions()) {
+            .getAllLocalBucketRegions()) {
           try {
+            logger.info("Jinmei: PartitionedRegionClear.obtainClearLockLocal, actually locking"
+                + partitionedRegion.getName());
             localPrimaryBucketRegion.lockLocallyForClear(partitionedRegion.getDistributionManager(),
                 partitionedRegion.getMyId(), null);
           } catch (Exception ex) {
@@ -241,7 +263,7 @@ public class PartitionedRegionClear {
         if (partitionedRegion.getDataStore() != null) {
 
           for (BucketRegion localPrimaryBucketRegion : partitionedRegion.getDataStore()
-              .getAllLocalPrimaryBucketRegions()) {
+              .getAllLocalBucketRegions()) {
             try {
               localPrimaryBucketRegion.releaseLockLocallyForClear(null);
             } catch (Exception ex) {
@@ -378,6 +400,7 @@ public class PartitionedRegionClear {
       if (cacheWrite) {
         invokeCacheWriter(regionEvent);
       }
+      logger.info("Jinmei: inside PartitionRegionClear.doClear");
 
       // Check if there are any listeners or clients interested. If so, then clear write
       // locks needs to be taken on all local and remote primary buckets in order to
@@ -385,6 +408,8 @@ public class PartitionedRegionClear {
       boolean acquireClearLockForNotification =
           (partitionedRegion.hasAnyClientsInterested() || partitionedRegion.hasListener());
       if (acquireClearLockForNotification) {
+        logger.info("Jinmei: PartitionRegionClear.doClear doObtainLockForClear"
+            + partitionedRegion.getName());
         obtainLockForClear(regionEvent);
       }
       try {
