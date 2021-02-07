@@ -583,8 +583,9 @@ public class BucketRegion extends DistributedRegion implements Bucket {
     logger.info("Jinmei: BucketRegion.cmnClearRegion isLockedAlready: " + isLockedAlready);
     try {
       if (!isLockedAlready) {
-        obtainWriteLocksForClear(regionEvent, participants);
+        lockLocallyForClear(getDistributionManager(), getMyId(), regionEvent);
       }
+      lockAndFlushClearToOthers(regionEvent, participants);
       // no need to dominate my own rvv.
       // Clear is on going here, there won't be GII for this member
       clearRegionLocally(regionEvent, cacheWrite, null);
@@ -593,8 +594,9 @@ public class BucketRegion extends DistributedRegion implements Bucket {
       // TODO: call reindexUserDataRegion if there're lucene indexes
     } finally {
       if (!isLockedAlready) {
-        releaseWriteLocksForClear(regionEvent, participants);
+        releaseLockLocallyForClear(regionEvent);
       }
+      DistributedClearOperation.releaseLocks(regionEvent, participants);
     }
   }
 

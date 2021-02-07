@@ -18,10 +18,12 @@ package org.apache.geode.cache.query.partitioned;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.Serializable;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -39,13 +41,17 @@ import org.apache.geode.test.dunit.AsyncInvocation;
 import org.apache.geode.test.dunit.rules.ClientVM;
 import org.apache.geode.test.dunit.rules.ClusterStartupRule;
 import org.apache.geode.test.dunit.rules.MemberVM;
+import org.apache.geode.test.junit.rules.ExecutorServiceRule;
 
 public class PRClearCreateIndexDUnitTest implements Serializable {
   @Rule
-  public ClusterStartupRule cluster = new ClusterStartupRule(4, true);
+  public ClusterStartupRule cluster = new ClusterStartupRule(5, true);
 
   private MemberVM primary, secondary;
   private ClientVM client;
+
+  @Rule
+  public ExecutorServiceRule executor = new ExecutorServiceRule();
 
   @Before
   public void before() throws Exception {
@@ -146,7 +152,7 @@ public class PRClearCreateIndexDUnitTest implements Serializable {
     createIndex.get();
     clear.get();
     primary.invoke(() -> verifyEvents(true, true, false, false));
-    secondary.invoke(() -> verifyEvents(false, false, false, true));
+    secondary.invoke(() -> verifyEvents(false, false, true, true));
   }
 
   @Test
@@ -175,7 +181,46 @@ public class PRClearCreateIndexDUnitTest implements Serializable {
     createIndex.get();
     clear.get();
     primary.invoke(() -> verifyEvents(false, false, false, false));
-    secondary.invoke(() -> verifyEvents(true, true, false, true));
+    secondary.invoke(() -> verifyEvents(true, true, true, true));
+  }
+
+  @Test
+  @Ignore
+  public void haTest() throws Exception {
+    int locatorPort = ClusterStartupRule.getDUnitLocatorPort();
+    // start a thread that start/stop a server constantly
+    System.out.println("Jinmei: start server3");
+    MemberVM server3 = cluster.startServerVM(2, locatorPort);
+    server3.invoke(() -> {
+      final Region regionA = ClusterStartupRule.memberStarter.createPartitionRegion("regionA",
+          f -> f.setTotalNumBuckets(1).setRedundantCopies(2));
+      IntStream.range(100, 200).forEach(j->{
+        regionA.put(j, "value"+j);
+      });
+    });
+
+    int port = primary.getPort();
+    client = cluster.startClientVM(3, c -> c.withServerConnection(port).withPoolSubscription(true));
+
+    AsyncInvocation clear = client.invokeAsync(() -> {
+      Thread.sleep(200);
+      ClientCache clientCache = ClusterStartupRule.getClientCache();
+      Region<Object, Object> regionA =
+          clientCache.createClientRegionFactory(ClientRegionShortcut.PROXY).create("regionA");
+      regionA.registerInterestForAllKeys();
+      IntStream.range(0, 10).forEach(i->{
+        regionA.clear();
+      });
+    });
+
+    CompletableFuture<Void> stopStart = executor.runAsync(() -> {
+      System.out.println("Jinmei: stop server3");
+      server3.stop();
+      System.out.println("Jinmei: server3 stopped");
+    });
+
+    stopStart.get();
+    clear.get();
   }
 
   private static void clear() throws InterruptedException {

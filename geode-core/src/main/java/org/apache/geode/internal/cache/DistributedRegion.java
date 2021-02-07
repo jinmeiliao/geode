@@ -2020,20 +2020,21 @@ public class DistributedRegion extends LocalRegion implements InternalDistribute
     // this member performs a clear.
     synchronized (clearLock) {
       if (enableRVV) {
-
         distributedLockForClear();
         try {
           Set<InternalDistributedMember> participants =
               getCacheDistributionAdvisor().adviseInvalidateRegion();
           // pause all generation of versions and flush from the other members to this one
           try {
-            obtainWriteLocksForClear(regionEvent, participants);
+            lockLocallyForClear(getDistributionManager(), getMyId(), regionEvent);
+            lockAndFlushClearToOthers(regionEvent, participants);
             clearRegionLocally(regionEvent, cacheWrite, null);
             if (!regionEvent.isOriginRemote() && regionEvent.getOperation().isDistributed()) {
               distributeClearOperation(regionEvent, null, participants);
             }
           } finally {
-            releaseWriteLocksForClear(regionEvent, participants);
+            releaseLockLocallyForClear(regionEvent);
+            DistributedClearOperation.releaseLocks(regionEvent, participants);
           }
         } finally {
           distributedUnlockForClear();
@@ -2083,16 +2084,6 @@ public class DistributedRegion extends LocalRegion implements InternalDistribute
   }
 
 
-  /**
-   * obtain locks preventing generation of new versions in other members
-   */
-  protected void obtainWriteLocksForClear(RegionEventImpl regionEvent,
-      Set<InternalDistributedMember> participants) {
-    logger.info("Jinmei: DistributedRegion.obtainWriteLocksForClear");
-    lockLocallyForClear(getDistributionManager(), getMyId(), regionEvent);
-    lockAndFlushClearToOthers(regionEvent, participants);
-  }
-
   void lockAndFlushClearToOthers(RegionEventImpl regionEvent,
       Set<InternalDistributedMember> participants) {
     DistributedClearOperation.lockAndFlushToOthers(regionEvent, participants);
@@ -2129,15 +2120,6 @@ public class DistributedRegion extends LocalRegion implements InternalDistribute
     if (armLockTestHook != null) {
       armLockTestHook.afterLock(this, null);
     }
-  }
-
-  /**
-   * releases the locks obtained in obtainWriteLocksForClear
-   */
-  protected void releaseWriteLocksForClear(RegionEventImpl regionEvent,
-      Set<InternalDistributedMember> participants) {
-    releaseLockLocallyForClear(regionEvent);
-    DistributedClearOperation.releaseLocks(regionEvent, participants);
   }
 
   protected void releaseLockLocallyForClear(RegionEventImpl regionEvent) {
