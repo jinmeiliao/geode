@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.query.FunctionDomainException;
@@ -170,6 +171,9 @@ public class PrimaryKeyIndex extends AbstractIndex {
     numUses++;
   }
 
+  public static CountDownLatch POINT_LATCH = new CountDownLatch(1);
+  public static CountDownLatch CLEAR_DONE = new CountDownLatch(1);
+
   @Override
   void lockedQuery(Object key, int operator, Collection results, CompiledValue iterOps,
       RuntimeIterator runtimeItr, ExecutionContext context, List projAttrib,
@@ -197,6 +201,11 @@ public class PrimaryKeyIndex extends AbstractIndex {
         if (key != null && key != QueryService.UNDEFINED) {
           Region.Entry entry = ((LocalRegion) getRegion()).accessEntry(key, false);
           if (entry != null) {
+            POINT_LATCH.countDown();
+            try {
+              CLEAR_DONE.await();
+            } catch (InterruptedException e) {
+            }
             Object value = entry.getValue();
             if (value != null) {
               boolean ok = true;

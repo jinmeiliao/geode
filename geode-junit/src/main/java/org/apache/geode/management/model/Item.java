@@ -66,8 +66,11 @@ public class Item implements Serializable {
 
   public Item() {}
 
+  public Item(String itemId) {
+    this.itemId = itemId;
+  }
+
   public Item(Order order, String itemId, String itemDescription) {
-    super();
     this.order = order;
     this.itemId = itemId;
     this.itemDescription = itemDescription;
